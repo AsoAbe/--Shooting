@@ -7,7 +7,7 @@ PixelShaderRenderer::PixelShaderRenderer(PixelShaderMaterial& material):material
 {
 	for (auto& i : indexes_)
 	{
-		i = -1;
+		i = INVALID_INDEX;
 	}
 	for (auto& v : vertexs_)
 	{
@@ -32,7 +32,7 @@ void PixelShaderRenderer::Draw(int inScreen, int outScreen)
 	material_.SetTextrue(inScreen);
 	//定数バッファ反映
 	material_.SetShaderConstantBufferFromMaterial();
-	SetUseTextureToShader(0, material_.GetTexture());
+	SetUseTextureToShader(TEXTURE_SLOT, material_.GetTexture());
 
 	// 使用するピクセルシェーダーをセット
 	SetUsePixelShader(material_.GetShader());
@@ -41,8 +41,8 @@ void PixelShaderRenderer::Draw(int inScreen, int outScreen)
 
 	//解除
 	MV1SetUseOrigShader(false);
-	SetUseTextureToShader(0, -1);
-	SetUsePixelShader(-1);
+	SetUseTextureToShader(TEXTURE_SLOT, INVALID_INDEX);
+	SetUsePixelShader(INVALID_INDEX);
 }
 
 void PixelShaderRenderer::SetPosAndDraw(int inScreen, int outScreen, int x, int y)
@@ -56,7 +56,7 @@ void PixelShaderRenderer::SetPosAndDraw(int inScreen, int outScreen, int x, int 
 	VECTOR diff = VSub(VGet(x,y,0), vertexs_[0].pos);
 
 	//0でも問題ないと思うけど念のため
-	if (VSquareSize(diff) > 1.0f)
+	if (VSquareSize(diff) > MIN_MOVE_DISTANCE)
 	{
 		for (auto& vp : vertexs_)
 		{
@@ -72,42 +72,61 @@ void PixelShaderRenderer::MakeSquereVertex(int sx, int sy, int ex, int ey)
 	// ４頂点の初期化
 	for (int i = 0; i < NUM_VERTEX; i++)
 	{
-		vertexs_[i].pos = VGet(0, 0, 0);
-		vertexs_[i].u = 0;
-		vertexs_[i].v = 0;
-		vertexs_[i].rhw = 1.0f;
-		vertexs_[i].dif = GetColorU8(255, 255, 255, 255);
-		vertexs_[i].spc = GetColorU8(255, 255, 255, 255);
-		vertexs_[i].su = 0.0f;
-		vertexs_[i].sv = 0.0f;
+		vertexs_[i].pos = VGet(
+			DEFAULT_POSITION,
+			DEFAULT_POSITION,
+			DEFAULT_POSITION);
+
+		vertexs_[i].u = TEXTURE_START;
+		vertexs_[i].v = TEXTURE_START;
+		vertexs_[i].rhw = DEFAULT_RHW;
+
+		vertexs_[i].dif = GetColorU8(
+			DEFAULT_COLOR,
+			DEFAULT_COLOR,
+			DEFAULT_COLOR,
+			DEFAULT_COLOR);
+
+		vertexs_[i].spc = GetColorU8(
+			DEFAULT_COLOR,
+			DEFAULT_COLOR,
+			DEFAULT_COLOR,
+			DEFAULT_COLOR);
+
+		vertexs_[i].su = TEXTURE_START;
+		vertexs_[i].sv = TEXTURE_START;
 	}
-	//左上
-	vertexs_[0].pos = VGet(sx, sy, 0);
-	vertexs_[0].u = 0;
-	vertexs_[0].v = 0;
-	//右上
-	vertexs_[1].pos = VGet(ex, sy, 0);
-	vertexs_[1].u = 1;
-	vertexs_[1].v = 0;
-	//左下
-	vertexs_[2].pos = VGet(sx, ey, 0);
-	vertexs_[2].u = 0;
-	vertexs_[2].v = 1;
-	//右下
-	vertexs_[3].pos = VGet(ex, ey, 0);
-	vertexs_[3].u = 1;
-	vertexs_[3].v = 1;
+	// 左上
+	vertexs_[0].pos = VGet(sx, sy, DEFAULT_POSITION);
+	vertexs_[0].u = TEXTURE_START;
+	vertexs_[0].v = TEXTURE_START;
+
+	// 右上
+	vertexs_[1].pos = VGet(ex, sy, DEFAULT_POSITION);
+	vertexs_[1].u = TEXTURE_END;
+	vertexs_[1].v = TEXTURE_START;
+
+	// 左下
+	vertexs_[2].pos = VGet(sx, ey, DEFAULT_POSITION);
+	vertexs_[2].u = TEXTURE_START;
+	vertexs_[2].v = TEXTURE_END;
+
+	// 右下
+	vertexs_[3].pos = VGet(ex, ey, DEFAULT_POSITION);
+	vertexs_[3].u = TEXTURE_END;
+	vertexs_[3].v = TEXTURE_END;
 
 	//インデックス登録
-	indexes_[0] = 2;
-	indexes_[1] = 0;
-	indexes_[2] = 1;
-	indexes_[3] = 1;
-	indexes_[4] = 3;
-	indexes_[5] = 2;
+	indexes_[0] = VERTEX_LEFT_BOTTOM;
+	indexes_[1] = VERTEX_LEFT_TOP;
+	indexes_[2] = VERTEX_RIGHT_TOP;
+
+	indexes_[3] = VERTEX_RIGHT_TOP;
+	indexes_[4] = VERTEX_RIGHT_BOTTOM;
+	indexes_[5] = VERTEX_LEFT_BOTTOM;
 }
 
 void PixelShaderRenderer::MakeScreenSquereVertex()
 {
-	MakeSquereVertex(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
+	MakeSquereVertex(DEFAULT_POSITION, DEFAULT_POSITION, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
 }

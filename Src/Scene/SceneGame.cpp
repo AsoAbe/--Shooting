@@ -188,17 +188,18 @@ void SceneGame::Update(void)
 		}
 	}
 }
+
 //描画
 void SceneGame::Draw(void)
 {
 	SceneManager& sceneManager = SceneManager::GetInstance();
 
+	// パネル描画
+	Draw_ScorePanel();
+
 	// メインスクリーンに切り替え
 	SetDrawScreen(mainGameScreen_);
 	ClearDrawScreen();
-
-	// パネル描画
-	Draw_ScorePanel();
 
 	// hpBar描画後にこの処理を入れないとエフェクトに不具合
 	sceneManager.GetCamera()->UpdateCameraPos();
@@ -220,6 +221,7 @@ void SceneGame::Draw(void)
 	SetDrawScreen(mainScreen);
 	mainPSRenderer_->Draw(mainGameScreen_, mainScreen);
 }
+
 //解放
 bool SceneGame::Release(void)
 {

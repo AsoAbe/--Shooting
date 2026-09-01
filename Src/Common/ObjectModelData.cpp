@@ -15,14 +15,14 @@ ObjectModelData::~ObjectModelData()
 void ObjectModelData::Clear()
 {
 	modelFileName_ = "";
-	model_ = -1;
-	modelScale_ = 1;
-	modelRot_ = VGet(0, 0, 0);
+	model_ = INVALID_MODEL_HANDLE;
+	modelScale_ = DEFAULT_MODEL_SCALE;
+	modelRot_ = VGet(DEFAULT_ROTATION, DEFAULT_ROTATION, DEFAULT_ROTATION);
 }
 
 void ObjectModelData::LoadModel()
 {
-	if (modelFileName_ != "" && model_ == -1)
+	if (modelFileName_ != "" && model_ == INVALID_MODEL_HANDLE)
 	{
 		model_ = MV1LoadModel((Application::PATH_MODEL + modelFileName_).c_str());
 	}
@@ -30,7 +30,7 @@ void ObjectModelData::LoadModel()
 
 void ObjectModelData::ReleaseModel()
 {
-	if (model_ != -1)
+	if (model_ != INVALID_MODEL_HANDLE)
 	{
 		MV1DeleteModel(model_);
 	}

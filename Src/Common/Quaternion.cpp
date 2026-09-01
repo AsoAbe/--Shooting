@@ -47,17 +47,12 @@ Quaternion Quaternion::Euler(double radX, double radY, double radZ)
     radY = AsoUtility::RadIn2PI(radY);
     radZ = AsoUtility::RadIn2PI(radZ);
 
-    double cosZ = cos(radZ / 2.0f);
-    double sinZ = sin(radZ / 2.0f);
-    double cosX = cos(radX / 2.0f);
-    double sinX = sin(radX / 2.0f);
-    double cosY = cos(radY / 2.0f);
-    double sinY = sin(radY / 2.0f);
-
-    //ret.w = cosZ * cosX * cosY + sinZ * sinX * sinY;
-    //ret.x = sinZ * cosX * cosY - cosZ * sinX * sinY;
-    //ret.y = cosZ * sinX * cosY + sinZ * cosX * sinY;
-    //ret.z = cosZ * cosX * sinY - sinZ * sinX * cosY;
+    double cosZ = cos(radZ * HALF);
+    double sinZ = sin(radZ * HALF);
+    double cosX = cos(radX * HALF);
+    double sinX = sin(radX * HALF);
+    double cosY = cos(radY * HALF);
+    double sinY = sin(radY * HALF);
 
     ret.w = cosX * cosY * cosZ + sinX * sinY * sinZ;
     ret.x = sinX * cosY * cosZ + cosX * sinY * sinZ;
@@ -120,23 +115,23 @@ Quaternion Quaternion::AngleAxis(double rad, VECTOR axis)
     double c, s;
 
     // UnityÇ…çáÇÌÇπÇÈ
-    //ret.w = ret.x = ret.y = ret.z = 0.0;
-    ret.w = 1.0;
-    ret.x = ret.y = ret.z = 0.0;
+    ret.w = IDENTITY_W;
+    ret.x = ret.y = ret.z = IDENTITY_COMPONENT;
+
 
     norm = (double)axis.x * (double)axis.x + (double)axis.y * (double)axis.y + (double)axis.z * (double)axis.z;
-    if (norm <= 0.0f)
+    if (norm <= IDENTITY_COMPONENT)
     {
         return ret;
     }
 
-    norm = 1.0 / sqrt(norm);
+    norm = IDENTITY_W / sqrt(norm);
     axis.x = (float)(axis.x * norm);
     axis.y = (float)(axis.y * norm);
     axis.z = (float)(axis.z * norm);
 
-    c = cos(0.5f * rad);
-    s = sin(0.5f * rad);
+    c = cos(HALF * rad);
+    s = sin(HALF * rad);
 
     ret.w = c;
     ret.x = s * axis.x;
@@ -150,10 +145,9 @@ Quaternion Quaternion::AngleAxis(double rad, VECTOR axis)
 VECTOR Quaternion::PosAxis(const Quaternion& q, VECTOR pos)
 {
     // à íuèÓïÒÇ…âÒì]èÓïÒÇîΩâfÇ≥ÇπÇÈ
-    // pos' = qÅEposÅEq(-1)
     Quaternion tmp = Quaternion();
     tmp = tmp.Mult(q);
-    tmp = tmp.Mult(Quaternion(0.0f, pos.x, pos.y, pos.z));
+    tmp = tmp.Mult(Quaternion(IDENTITY_COMPONENT, pos.x, pos.y, pos.z));
     tmp = tmp.Mult(q.Inverse());
     return { (float)tmp.x, (float)tmp.y, (float)tmp.z };
 }
@@ -208,42 +202,8 @@ MATRIX Quaternion::ToMatrix(const Quaternion& q)
     mat.m[1][0] = cz - wz;			mat.m[1][1] = 1.0f - (sx + sz);	mat.m[1][2] = cx + wx;			mat.m[1][3] = 0.0f;
     mat.m[2][0] = cy + wy;			mat.m[2][1] = cx - wx;			mat.m[2][2] = 1.0f - (sx + sy);	mat.m[2][3] = 0.0f;
     mat.m[3][0] = 0.0f;				mat.m[3][1] = 0.0f;				mat.m[3][2] = 0.0f;				mat.m[3][3] = 1.0f;
-    //mat.m[3][0] = trans.x;				mat.m[3][1] = trans.y;				mat.m[3][2] = trans.z;				mat.m[3][3] = 1.0f;
 
     return mat;
-
-    //double sqw = q.w * q.w;
-    //double sqx = q.x * q.x;
-    //double sqy = q.y * q.y;
-    //double sqz = q.z * q.z;
-    //double invs = 1.0 / (sqx + sqy + sqz + sqw);
-
-    //MATRIX matrix = MGetIdent();
-
-    //matrix.m[0][0] = static_cast<float>((sqx - sqy - sqz + sqw) * invs);
-    //matrix.m[1][1] = static_cast<float>((-sqx + sqy - sqz + sqw) * invs);
-    //matrix.m[2][2] = static_cast<float>((-sqx - sqy + sqz + sqw) * invs);
-
-    //double tmp1 = q.x * q.y;
-    //double tmp2 = q.z * q.w;
-    ////matrix.m[0][1] = static_cast<float>(2.0 * (tmp1 + tmp2) * invs);
-    ////matrix.m[1][0] = static_cast<float>(2.0 * (tmp1 - tmp2) * invs);
-    //matrix.m[0][1] = static_cast<float>(2.0 * (tmp1 - tmp2) * invs);
-    //matrix.m[1][0] = static_cast<float>(2.0 * (tmp1 + tmp2) * invs);
-
-    //tmp1 = q.x * q.z;
-    //tmp2 = q.y * q.w;
-    //matrix.m[0][2] = static_cast<float>(2.0 * (tmp1 - tmp2) * invs);
-    //matrix.m[2][0] = static_cast<float>(2.0 * (tmp1 + tmp2) * invs);
-
-    //tmp1 = q.y * q.z;
-    //tmp2 = q.x * q.w;
-    ////matrix.m[1][2] = static_cast<float>(2.0 * (tmp1 + tmp2) * invs);
-    ////matrix.m[2][1] = static_cast<float>(2.0 * (tmp1 - tmp2) * invs);
-    //matrix.m[1][2] = static_cast<float>(2.0 * (tmp1 - tmp2) * invs);
-    //matrix.m[2][1] = static_cast<float>(2.0 * (tmp1 + tmp2) * invs);
-
-    //return matrix;
 
 }
 
@@ -254,7 +214,7 @@ MATRIX Quaternion::ToMatrix(void) const
 
 Quaternion Quaternion::LookRotation(VECTOR dir)
 {
-    VECTOR up = { 0.0f, 1.0f, 0.0f };
+    VECTOR up = AsoUtility::DIR_U;
     return LookRotation(dir, up);
 }
 
@@ -289,14 +249,7 @@ Quaternion Quaternion::LookRotation(VECTOR dir, VECTOR up)
     }
     if ((m00 >= m11) && (m00 >= m22))
     {
-        // xÇ∆wÇ™ãtÅH
-        //auto num7 = sqrt(((1.0f + m00) - m11) - m22);
-        //auto num4 = 0.5f / num7;
-        //quaternion.x = 0.5f * num7;
-        //quaternion.y = (m01 + m10) * num4;
-        //quaternion.z = (m02 + m20) * num4;
-        //quaternion.w = (m12 - m21) * num4;
-        //return quaternion.Normalized();
+       
         auto num7 = sqrt(((1.0f + m00) - m11) - m22);
         auto num4 = 0.5f / num7;
         quaternion.x = ((double)m12 - m21) * num4;
@@ -384,57 +337,6 @@ Quaternion Quaternion::GetRotation(MATRIX mat)
     return ret;
 
 
-    //float elem[4];
-    //elem[0] = mat.m[0][0] - mat.m[1][1] - mat.m[2][2] + 1.0f;
-    //elem[1] = -mat.m[0][0] + mat.m[1][1] - mat.m[2][2] + 1.0f;
-    //elem[2] = -mat.m[0][0] - mat.m[1][1] + mat.m[2][2] + 1.0f;
-    //elem[3] = mat.m[0][0] + mat.m[1][1] + mat.m[2][2] + 1.0f;
-
-    //int biggestIdx = 0;
-    //for (int i = 0; i < 4; i++)
-    //{
-    //    if (elem[i] > elem[biggestIdx])
-    //    {
-    //        biggestIdx = i;
-    //    }
-    //}
-
-    //if (elem[biggestIdx] < 0)
-    //{
-    //    return Quaternion();
-    //}
-
-    //float q[4];
-    //float v = sqrt(elem[biggestIdx]) * 0.5f;
-    //q[biggestIdx] = v;
-    //float mult = 0.25f / v;
-
-    //switch (biggestIdx)
-    //{
-    //case 0:
-    //    q[1] = (mat.m[1][0] + mat.m[0][1]) * mult;
-    //    q[2] = (mat.m[0][2] + mat.m[2][0]) * mult;
-    //    q[3] = (mat.m[2][1] - mat.m[1][2]) * mult;
-    //    break;
-    //case 1:
-    //    q[0] = (mat.m[1][0] + mat.m[0][1]) * mult;
-    //    q[2] = (mat.m[2][1] + mat.m[1][2]) * mult;
-    //    q[3] = (mat.m[0][2] - mat.m[2][0]) * mult;
-    //    break;
-    //case 2:
-    //    q[0] = (mat.m[0][2] + mat.m[2][0]) * mult;
-    //    q[1] = (mat.m[2][1] + mat.m[1][2]) * mult;
-    //    q[3] = (mat.m[1][0] - mat.m[0][1]) * mult;
-    //    break;
-    //case 3:
-    //    q[0] = (mat.m[2][1] - mat.m[1][2]) * mult;
-    //    q[1] = (mat.m[0][2] - mat.m[2][0]) * mult;
-    //    q[2] = (mat.m[1][0] - mat.m[0][1]) * mult;
-    //    break;
-    //}
-
-    //return Quaternion(q[3], q[0], q[1], q[2]);
-
 }
 
 VECTOR Quaternion::GetDir(VECTOR dir) const
@@ -513,7 +415,7 @@ void Quaternion::Normalize(void)
 Quaternion Quaternion::Inverse(void) const
 {
 
-    double n = 1.0f / (w * w + x * x + y * y + z * z);
+    double n = IDENTITY_W / (w * w + x * x + y * y + z * z);
     Quaternion tmp = Quaternion(w, -x, -y, -z);
     return Quaternion(tmp.w * n, tmp.x * n, tmp.y * n, tmp.z * n);;
 
@@ -521,8 +423,16 @@ Quaternion Quaternion::Inverse(void) const
 
 Quaternion Quaternion::Slerp(Quaternion from, Quaternion to, double t)
 {
-    if (t > 1) t = 1;
-    if (t < 0) t = 0;
+    if (t > UNIT_LENGTH)
+    {
+        t = UNIT_LENGTH;
+    }
+
+    if (t < IDENTITY_COMPONENT)
+    {
+        t = IDENTITY_COMPONENT;
+    }
+
     return SlerpUnclamped(from, to, (float)t);
 
 }
@@ -540,13 +450,12 @@ Quaternion Quaternion::FromToRotation(VECTOR fromDir, VECTOR toDir)
 
 	VECTOR axis = VCross(fromDir, toDir);
 	double angle = AsoUtility::AngleDeg(fromDir, toDir);
-	if (angle >= 179.9196)
+	if (angle >= NEAR_180_DEGREES)
 	{
 		auto r = VCross(fromDir, AsoUtility::DIR_R);
 		axis = VCross(r, fromDir);
-		//if (axis.sqrMagnitude < 0.000001f)
 		float len = axis.x * axis.x + axis.y * axis.y + axis.z * axis.z;
-		if (len < 0.000001f)
+		if (len < EPSILON_LENGTH_SQUARED)
 		{
 			axis = AsoUtility::DIR_U;
 		}
@@ -560,11 +469,11 @@ Quaternion Quaternion::FromToRotation(VECTOR fromDir, VECTOR toDir)
 Quaternion Quaternion::RotateTowards(const Quaternion& from, const Quaternion& to, float maxDegreesDelta)
 {
     double num = Quaternion::Angle(from, to);
-    if (num == 0.0)
+    if (num == IDENTITY_COMPONENT)
     {
         return to;
     }
-    float t = min(1.0f, maxDegreesDelta / (float)num);
+    float t = min(static_cast<float>(UNIT_LENGTH), maxDegreesDelta / (float)num);
     return Quaternion::SlerpUnclamped(from, to, t);
 }
 
@@ -578,16 +487,15 @@ double Quaternion::Angle(const Quaternion& q1, const Quaternion& q2)
 Quaternion Quaternion::SlerpUnclamped(Quaternion a, Quaternion b, float t)
 {
 
-    // if either input is zero, return the other.
-    if (a.LengthSquared() == 0.0f)
+    if (a.LengthSquared() == IDENTITY_COMPONENT)
     {
-        if (b.LengthSquared() == 0.0f)
+        if (b.LengthSquared() == IDENTITY_COMPONENT)
         {
             return Identity();
         }
         return b;
     }
-    else if (b.LengthSquared() == 0.0f)
+    else if (b.LengthSquared() == IDENTITY_COMPONENT)
     {
         return a;
     }
@@ -595,26 +503,23 @@ Quaternion Quaternion::SlerpUnclamped(Quaternion a, Quaternion b, float t)
 
     float cosHalfAngle = (float)(a.w * b.w) + VDot(a.xyz(), b.xyz());
 
-    if (cosHalfAngle >= 1.0f || cosHalfAngle <= -1.0f)
+    if (cosHalfAngle >= UNIT_LENGTH || cosHalfAngle <= REVERSE)
     {
-        // angle = 0.0f, so just return one input.
         return a;
     }
-    else if (cosHalfAngle < 0.0f)
+    else if (cosHalfAngle < IDENTITY_COMPONENT)
     {
-        //b.xyz() = -b.xyz();
-		b.x = b.x * -1.0f;
-		b.y = b.y * -1.0f;
-		b.z = b.z * -1.0f;
-		b.w = -b.w;
+		b.x = b.x * REVERSE;
+		b.y = b.y * REVERSE;
+		b.z = b.z * REVERSE;
+		b.w = b.w * REVERSE;
         cosHalfAngle = -cosHalfAngle;
     }
 
     float blendA;
     float blendB;
-    if (cosHalfAngle < 0.99f)
+    if (cosHalfAngle < SLERP_THRESHOLD)
     {
-        // do proper slerp for big angles
         float halfAngle = acosf(cosHalfAngle);
         float sinHalfAngle = sinf(halfAngle);
         float oneOverSinHalfAngle = 1.0f / sinHalfAngle;
@@ -623,16 +528,13 @@ Quaternion Quaternion::SlerpUnclamped(Quaternion a, Quaternion b, float t)
     }
     else
     {
-        // do lerp if angle is really small.
         blendA = 1.0f - t;
         blendB = t;
     }
 
-    //Quaternion result = Quaternion(blendA * a.xyz() + blendB * b.xyz(), blendA * a.w + blendB * b.w);
     VECTOR v = VAdd(VScale(a.xyz(), blendA), VScale(b.xyz(), blendB));
-    //Quaternion result = Quaternion(v.x, v.y, v.z, blendA * a.w + blendB * b.w);
 	Quaternion result = Quaternion(blendA * a.w + blendB * b.w, v.x, v.y, v.z);
-    if (result.LengthSquared() > 0.0f)
+    if (result.LengthSquared() > IDENTITY_COMPONENT)
     {
         return Normalize(result);
     }
@@ -645,7 +547,11 @@ Quaternion Quaternion::SlerpUnclamped(Quaternion a, Quaternion b, float t)
 
 Quaternion Quaternion::Identity(void)
 {
-    return Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
+    return Quaternion(
+		IDENTITY_W,
+		IDENTITY_COMPONENT,
+		IDENTITY_COMPONENT,
+		IDENTITY_COMPONENT);
 }
 
 double Quaternion::Length(void) const
@@ -666,21 +572,22 @@ VECTOR Quaternion::xyz(void) const
 void Quaternion::ToAngleAxis(float* angle, VECTOR* axis)
 {
 
-	if (abs(this->w) > 1.0f)
+	if (abs(this->w) > MAX_ROTATION_VALUE)
 	{
 		this->Normalize();
 	}
 	*angle = 2.0f * acosf((float)this->w); // angle
 
-    if (x == 0 && y == 0 && z == 0)
+    if (x == IDENTITY_COMPONENT &&
+        y == IDENTITY_COMPONENT &&
+        z == IDENTITY_COMPONENT)
     {
-        *angle = 0.0f;
+        *angle = IDENTITY_COMPONENT;
     }
 
-	float den = sqrtf(1.0f - (float)(this->w * this->w));
-	if (den > 0.0001f)
+	float den = sqrtf(MAX_ROTATION_VALUE - (float)(this->w * this->w));
+	if (den > EPSILON_AXIS)
 	{
-		//axis = q->xyz / den;
 		auto v = this->xyz();
 		axis->x = v.x / den;
 		axis->y = v.y / den;
@@ -688,9 +595,11 @@ void Quaternion::ToAngleAxis(float* angle, VECTOR* axis)
 	}
 	else
 	{
-		// This occurs when the angle is zero. 
-		// Not a problem: just set an arbitrary normalized axis.
-		*axis = { 1.0f, 0.0f, 0.0f };
+        *axis = {
+               static_cast<float>(IDENTITY_W),
+               static_cast<float>(IDENTITY_COMPONENT),
+               static_cast<float>(IDENTITY_COMPONENT)
+        };
 	}
 
 }

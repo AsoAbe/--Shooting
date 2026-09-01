@@ -14,14 +14,14 @@ AnimationController::AnimationController(int modelId,const CharacterModelData& m
 {
 	modelId_ =modelId;
 
-	playType_ = -1;
+	playType_ = INVALID_PLAY_TYPE;
 	isLoop_ = false;
-
 	isStop_ = false;
-	switchLoopReverse_ = 0.0f;
-	endLoopSpeed_ = 0.0f;
-	stepEndLoopStart_ = 0.0f;
-	stepEndLoopEnd_ = 0.0f;
+
+	switchLoopReverse_ = PLAY_FORWARD;
+	endLoopSpeed_ = DEFAULT_SPEED;
+	stepEndLoopStart_ = DEFAULT_STEP;
+	stepEndLoopEnd_ = DEFAULT_STEP;
 }
 
 AnimationController::~AnimationController(void)
@@ -73,17 +73,11 @@ void AnimationController::Play(ANIM type, bool isLoop,
 		playAnim_.step = startStep;
 
 		// モデルにアニメーションを付ける
-		//int animIdx = 0;
-		//if (MV1GetAnimNum(playAnim_.model) > 1)
-		//{
-		//	// アニメーションが複数保存されていたら、番号1を指定
-		//	animIdx = 1;
-		//}
 		int animIdx = modelData_.GetAnimIndex(type);
 		playAnim_.attachNo = MV1AttachAnim(modelId_, animIdx, playAnim_.model);
 
 		// アニメーション総時間の取得
-		if (endStep < 0.0f)
+		if (endStep < DEFAULT_STEP)
 		{
 			endStep = MV1GetAttachAnimTotalTime(modelId_, playAnim_.attachNo);
 		}
@@ -95,7 +89,7 @@ void AnimationController::Play(ANIM type, bool isLoop,
 		// アニメーションしない
 		isStop_ = isStop;
 
-		switchLoopReverse_ = 1.0f;
+		switchLoopReverse_ = PLAY_FORWARD;
 		float endLoopSpd = CharacterModelData::DEFAULT_ANIMSPD;
 		if (type == ANIM::FALLING)
 		{
@@ -110,7 +104,7 @@ void AnimationController::Update(void)
 {
 
 	// 経過時間の取得
-	float deltaTime = 1.0f / Application::FPS;
+	float deltaTime = SECONDS_PER_FRAME / Application::FPS;
 
 	if (!isStop_)
 	{
@@ -119,7 +113,7 @@ void AnimationController::Update(void)
 
 		// アニメーション終了判定
 		bool isEnd = false;
-		if (switchLoopReverse_ > 0.0f)
+		if (switchLoopReverse_ > DEFAULT_STEP)
 		{
 			// 通常再生の場合
 			if (playAnim_.step > playAnim_.totalTime)
@@ -142,11 +136,11 @@ void AnimationController::Update(void)
 			if (isLoop_)
 			{
 				// ループ再生
-				if (stepEndLoopStart_ > 0.0f)
+				if (stepEndLoopStart_ > DEFAULT_STEP)
 				{
 					// アニメーション終了後の指定フレーム再生
-					switchLoopReverse_ *= -1.0f;
-					if (switchLoopReverse_ > 0.0f)
+					switchLoopReverse_ *= PLAY_REVERSE;
+					if (switchLoopReverse_ > DEFAULT_STEP)
 					{
 						playAnim_.step = stepEndLoopStart_;
 						playAnim_.totalTime = stepEndLoopEnd_;
@@ -162,7 +156,7 @@ void AnimationController::Update(void)
 				else
 				{
 					// 通常のループ再生
-					playAnim_.step = 0.0f;
+					playAnim_.step = DEFAULT_STEP;
 				}
 			}
 			else

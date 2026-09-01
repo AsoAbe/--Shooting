@@ -11,27 +11,47 @@ namespace
 	/// FLOAT4の中のfloatの数を表す
 	/// </summary>
 	constexpr int RGBA = 4;
+
+	/// <summary>
+	/// 無効なシェーダーハンドル
+	/// </summary>
+	constexpr int INVALID_SHADER_HANDLE = -1;
+
+	/// <summary>
+	/// 無効なテクスチャハンドル
+	/// </summary>
+	constexpr int INVALID_TEXTURE_HANDLE = -1;
+
+	/// <summary>
+	/// バッファサイズの最小値
+	/// </summary>
+	constexpr int MIN_BUFFER_SIZE = 0;
+
+	/// <summary>
+/// 1回の書き込みで使用するfloatの数
+/// </summary>
+	constexpr int SINGLE_FLOAT_COUNT = 1;
 }
 
 PixelShaderMaterial::PixelShaderMaterial(const std::string& shaderFileName, int bufSize)
 {
-	bufSize_ = 0;
-	if (bufSize > 0)
+	bufSize_ = MIN_BUFFER_SIZE;
+	if (bufSize > MIN_BUFFER_SIZE)
 	{
 		//bufSize_は常に4の倍数
 		bufSize_ = static_cast<int>(ceilf(static_cast<float>(bufSize)/ RGBA))* RGBA;
 	}
 	shader_ = LoadPixelShader((Application::PATH_SHADER + shaderFileName).c_str());
 	bufHandle_ = CreateShaderConstantBuffer(sizeof(float) * bufSize_);
-	texture_ = -1;
+	texture_ = INVALID_TEXTURE_HANDLE;
 }
 
 PixelShaderMaterial::~PixelShaderMaterial()
 {
 	int i = DeleteShaderConstantBuffer(bufHandle_);
-	bufHandle_ = -1;
+	bufHandle_ = INVALID_TEXTURE_HANDLE;
 	DeleteShader(shader_);
-	shader_ = -1;
+	shader_ = INVALID_TEXTURE_HANDLE;
 }
 
 void PixelShaderMaterial::SetTextrue(int tex)
@@ -46,7 +66,7 @@ int PixelShaderMaterial::GetTexture() const
 
 void PixelShaderMaterial::SetValue(float v, int idx)
 {
-	if (idx+1 > bufSize_ || idx <0)
+	if (idx+ SINGLE_FLOAT_COUNT > bufSize_ || idx < MIN_BUFFER_SIZE)
 	{
 		//無効
 		return;
@@ -59,7 +79,7 @@ void PixelShaderMaterial::SetValue(float v, int idx)
 
 void PixelShaderMaterial::SetColor(float r, float g, float b, float a, int idx)
 {
-	if (idx + RGBA > bufSize_ * RGBA || idx < 0)
+	if (idx + RGBA > bufSize_ * RGBA || idx < MIN_BUFFER_SIZE)
 	{
 		//入りきらないのでリターン
 		return;

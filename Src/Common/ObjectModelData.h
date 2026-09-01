@@ -5,6 +5,16 @@
 class ObjectModelData
 {
 public:
+
+	// 無効なモデルハンドル
+	static constexpr int INVALID_MODEL_HANDLE = -1;
+
+	// デフォルトのモデルサイズ
+	static constexpr float DEFAULT_MODEL_SCALE = 1.0f;
+
+	// デフォルトの回転値
+	static constexpr float DEFAULT_ROTATION = 0.0f;
+
 	//モデルのファイル名
 	std::string modelFileName_;
 	//キャラのモデルのハンドル

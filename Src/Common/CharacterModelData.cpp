@@ -27,7 +27,7 @@ void CharacterModelData::Clear()
 {
 	anim_.clear();
 	modelFileName_ = "";
-	model_ = -1;
+	model_ = INVALID_MODEL_HANDLE;
 	gliderS_ = 0;
 	gliderE_ = 0;
 	onGroundS_ = 0;
@@ -35,7 +35,7 @@ void CharacterModelData::Clear()
 
 void CharacterModelData::LoadModel()
 {
-	if (modelFileName_ != "" && model_ == -1)
+	if (modelFileName_ != "" && model_ == INVALID_MODEL_HANDLE)
 	{
 		model_ = MV1LoadModel((Application::PATH_MODEL+modelFileName_).c_str());
 	}
@@ -48,7 +48,7 @@ CharacterModelData::AnimData::~AnimData()
 
 int CharacterModelData::AnimData::LoadAModel()
 {
-	if (handle != -1)
+	if (handle != INVALID_MODEL_HANDLE)
 	{
 		return handle;
 	}
@@ -58,7 +58,7 @@ int CharacterModelData::AnimData::LoadAModel()
 
 int CharacterModelData::AnimData::ReleaseAModel()
 {
-	if (fileName == "" || handle == -1)
+	if (fileName == "" || handle == INVALID_MODEL_HANDLE)
 	{
 		// 次に読み込むモデルの物理演算モードをリアルタイム物理演算にする
 		MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_REALTIME);
@@ -70,10 +70,10 @@ int CharacterModelData::AnimData::ReleaseAModel()
 
 void CharacterModelData::ReleaseModel()
 {
-	if (model_ != -1)
+	if (model_ != INVALID_MODEL_HANDLE)
 	{
 		MV1DeleteModel(model_);
-		model_ = -1;
+		model_ = INVALID_MODEL_HANDLE;
 	}
 	Clear();
 }
@@ -89,21 +89,10 @@ int CharacterModelData::GetAnimIndex(ANIM anim)const
 	if (anim_.size() <= i)
 	{
 		//範囲外
-		return -1;
+		return INVALID_ANIM_INDEX;
 	}
 	return anim_[i].index;
 }
-
-//const std::string& CharacterModelData::GetAnimPath(ANIM anim)const
-//{
-//	int i = CharacterBase::GetAnimType(anim);
-//	if (anim_.size() <= i)
-//	{
-//		//範囲外
-//		return anim_[0].fileName;
-//	}
-//	return anim_[i].fileName;
-//}
 
 int CharacterModelData::GetAnimMHandle(ANIM anim)const
 {
@@ -111,7 +100,7 @@ int CharacterModelData::GetAnimMHandle(ANIM anim)const
 	if (anim_.size() <= i)
 	{
 		//範囲外
-		return -1;
+		return INVALID_MODEL_HANDLE;
 	}
 	return anim_[i].handle;
 }

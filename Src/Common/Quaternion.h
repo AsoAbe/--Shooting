@@ -6,9 +6,39 @@ class Quaternion
 {
 
 public:
-	
-	static constexpr float kEpsilonNormalSqrt = 1e-15F;
 
+	// 正規化判定用の許容誤差
+	static constexpr float EPSILON_NORMAL_SQRT = 1e-15F;
+
+	// クォータニオンの単位長
+	static constexpr double UNIT_LENGTH = 1.0;
+
+	// クォータニオンの実部
+	static constexpr double IDENTITY_W = 1.0;
+
+	// クォータニオンの虚部
+	static constexpr double IDENTITY_COMPONENT = 0.0;
+
+	// 半分を表す値
+	static constexpr double HALF = 0.5;
+
+	// 逆方向
+	static constexpr double REVERSE = -1.0;
+
+	// ほぼ180度と判定する角度
+	static constexpr double NEAR_180_DEGREES = 179.9196;
+
+	// ほぼゼロと判定する長さの二乗
+	static constexpr float EPSILON_LENGTH_SQUARED = 0.000001f;
+
+	// Slerpで線形補間に切り替える閾値
+	static constexpr float SLERP_THRESHOLD = 0.99f;
+
+	// 回転値の上限
+	static constexpr float MAX_ROTATION_VALUE = 1.0f;
+
+	// 回転軸を判定する許容値
+	static constexpr float EPSILON_AXIS = 0.0001f;
 	double w;
 	double x;
 	double y;

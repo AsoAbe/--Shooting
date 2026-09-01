@@ -57,34 +57,6 @@ void DrawUtility::DrawBar(Vector2 start, int endX, int width, const IntRGB& colo
 	}
 }
 
-//void DrawUtility::DrawBar(Vector2 start, int barX, int endX, int width, int color)
-//{
-//	if (start.x < barX)
-//	{
-//		DrawBox(start.x, start.y
-//			, barX, start.y + width
-//			, color, true);
-//	}
-//	if (barX < endX)
-//	{
-//		DrawBox(barX, start.y
-//			, endX, start.y + width
-//			, 0x000000, true);
-//	}
-//}
-//
-//int DrawUtility::GetBarX(int startX, int length, float i, float max)
-//{
-//	if (i <= 0)
-//	{
-//		//マイナスの場合はゼロとして扱う
-//		return startX;
-//	}
-//	int barX = static_cast<int>((length * (i / max)));
-//	
-//	return startX + barX;
-//}
-
 void DrawUtility::DrawBarImg(int x, int y, int num, int max, int imgT, int imgF, int imgSize, int shakeLine)
 {
 	constexpr int SHAKE = 4;//揺れる幅
@@ -154,7 +126,6 @@ int DrawUtility::LerpInt(int a, int b, float f)
 		return b;
 	}
 	int ret = static_cast<int>(a + (f * (b - a)));
-	//return static_cast<int>(a + (f * (b-a)));
 	return ret;
 }
 
@@ -168,46 +139,11 @@ unsigned int DrawUtility::LerpColor(const IntRGB& a, const IntRGB& b, float f)
 		LerpInt(a.b, b.b, f));
 }
 
-//void DrawUtility::DrawBarGlossy(Vector2 start, int barX, int endX, int width, const IntRGB& color)
-//{
-//	//枠線のぶんだけ加算
-//	endX += FRAME_WIDTH_BAR*2;
-//	barX += FRAME_WIDTH_BAR;
-//	start.x += FRAME_WIDTH_BAR;
-//	start.y += FRAME_WIDTH_BAR;
-//	//枠線
-//	DrawBox(start.x - FRAME_WIDTH_BAR, start.y - FRAME_WIDTH_BAR,
-//		endX + FRAME_WIDTH_BAR, start.y + width + FRAME_WIDTH_BAR,
-//		GetColor(50, 50, 50), true);
-//	//LerpColor(color, { 0,0,0 }, 0.75f)
-//	if (start.x < barX)
-//	{
-//		int loop = 16;
-//		for (int i = 0; i < loop; i++)
-//		{
-//			//グラデーション
-//			//DrawBox(start.x, start.y + i
-//			//	, barX, start.y + width - i
-//			//	, LerpColor(color, { 255,255,255 }, 1.0f / loop * i), true);
-//			DrawBox( std::min(barX,static_cast<int>( start.x + (i* static_cast<float>(endX)/loop))), start.y
-//				, barX, start.y + width
-//				, LerpColor(color, {0,0,0},0.4f/ loop *(i)), true);
-//		}
-//	}
-//	if (barX < endX)
-//	{
-//		DrawBox(barX, start.y
-//			, endX, start.y + width
-//			, 0x000000, true);
-//	}
-//}
 
 void DrawUtility::DrawBarGlossy(Vector2 start, int endX, int width, const IntRGB& color, float value, float valueMax)
 {
 	//枠線
-	//DrawBox(start.x, start.y,
-	//	endX + FRAME_WIDTH_BAR*2, start.y + width + FRAME_WIDTH_BAR * 2,
-	//	GetColor(50, 50, 50), true);
+	
 	DrawBox(start.x, start.y,
 		endX + FRAME_WIDTH_BAR * 2, start.y + width + FRAME_WIDTH_BAR * 2,
 		GetColor(206, 168, 78), true);
@@ -229,9 +165,7 @@ void DrawUtility::DrawBarGlossy(Vector2 start, int endX, int width, const IntRGB
 		for (int i = 0; i < loop; i++)
 		{
 			//グラデーション
-			//DrawBox(start.x, start.y + i
-			//	, barX, start.y + width - i
-			//	, LerpColor(color, { 255,255,255 }, 1.0f / loop * i), true);
+			
 			DrawBox(std::min(barX, static_cast<int>(start.x + (i * static_cast<float>(endX - start.x) / loop))), start.y
 				, barX, start.y + width
 				, LerpColor(color, { 0,0,0 }, 0.4f / loop * (i)), true);

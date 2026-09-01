@@ -43,8 +43,41 @@ public:
 	/// </summary>
 	void MakeScreenSquereVertex();
 private:
+	// 頂点数
 	static constexpr int NUM_VERTEX = 4;
+
+	// 頂点インデックス数
 	static constexpr int NUM_VERTEX_IDX = 6;
+
+	// 無効なインデックス
+	static constexpr int INVALID_INDEX = -1;
+
+	// テクスチャを設定するスロット番号
+	static constexpr int TEXTURE_SLOT = 0;
+
+	// 頂点の初期座標
+	static constexpr float DEFAULT_POSITION = 0.0f;
+
+	// テクスチャ座標の開始位置
+	static constexpr float TEXTURE_START = 0.0f;
+
+	// テクスチャ座標の終了位置
+	static constexpr float TEXTURE_END = 1.0f;
+
+	// 頂点の深度
+	static constexpr float DEFAULT_RHW = 1.0f;
+
+	// 頂点カラー
+	static constexpr int DEFAULT_COLOR = 255;
+
+	// 座標移動が不要と判断する最小距離
+	static constexpr float MIN_MOVE_DISTANCE = 1.0f;
+
+	// 頂点番号
+	static constexpr int VERTEX_LEFT_TOP = 0;
+	static constexpr int VERTEX_RIGHT_TOP = 1;
+	static constexpr int VERTEX_LEFT_BOTTOM = 2;
+	static constexpr int VERTEX_RIGHT_BOTTOM = 3;
 
 	PixelShaderMaterial& material_;
 	// 頂点

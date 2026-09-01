@@ -12,9 +12,23 @@ using ANIM = CharacterBase::ANIM;
 class CharacterModelData
 {
 public:
-	//基準のアニメーション速度
+	// 無効なモデルハンドル
+	static constexpr int INVALID_MODEL_HANDLE = -1;
+
+	// 無効なアニメーションインデックス
+	static constexpr int INVALID_ANIM_INDEX = -1;
+
+	// デフォルトのアニメーション速度
 	static constexpr int DEFAULT_ANIMSPD = 30;
+
+	// 落下アニメーション終了後のループ速度
 	static constexpr int DEFAULT_ENDLOOPSPD_FALL = 2;
+
+	// デフォルトの整数値
+	static constexpr int DEFAULT_VALUE = 0;
+
+	// 空のファイル名
+	static constexpr char EMPTY_FILE_NAME[] = "";
 
 	//モデルのファイル名
 	std::string modelFileName_;
@@ -106,11 +120,7 @@ private:
 		/// <returns></returns>
 		int ReleaseAModel();
 	};
-	////アニメーションのソースのモデルのハンドル。モデルと同じファイル内の場合は-1
-	//std::vector<int> animSrc_;
-	//アニメーションのソースのモデルのファイル名。アニメーションがモデルと同じファイル内の場合は何も入れない
-	//std::vector<std::string> animFileName_;
-	////インデックス
+	
 	//std::vector<int> animIndex_;
 	std::vector<AnimData> anim_;
 
