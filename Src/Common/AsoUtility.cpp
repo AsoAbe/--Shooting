@@ -40,7 +40,7 @@ int AsoUtility::Round(float value)
 //デグリ角度をラジアン角度へ
 float AsoUtility::DegToRadF(float deg)
 {
-	return DX_PI_F / 180 * deg;
+	return DX_PI_F / HALF_DEGREE_D * deg;
 }
 //ラジアン角度をデグリ角度へ
 float AsoUtility::RadToDegF(float rad)
@@ -49,7 +49,7 @@ float AsoUtility::RadToDegF(float rad)
 	{
 		return 0;
 	}
-	return rad / DX_PI_F * 180;
+	return rad / DX_PI_F * HALF_DEGREE_D;
 }
 
 bool AsoUtility::EqualsVZero(const VECTOR& v1)
@@ -68,7 +68,7 @@ int AsoUtility::DirNearAroundDeg(float from, float to)
 	if (diff >= 0.0f)
 	{
 		//時計回り
-		if (diff <=180)
+		if (diff <= HALF_DEGREE_D)
 		{
 			ret = 1;
 		}
@@ -80,7 +80,7 @@ int AsoUtility::DirNearAroundDeg(float from, float to)
 	}
 	else
 	{
-		if (diff >= -180)
+		if (diff >= -HALF_DEGREE_D)
 		{
 			ret = -1;
 		}
@@ -94,20 +94,20 @@ int AsoUtility::DirNearAroundDeg(float from, float to)
 }
 float AsoUtility::DegIn360(float deg)
 {
-	deg = fmod(deg, 360.0f);
-	if (deg < 0.0f)
-	{
-		deg += 360.0f;
-	}
+    deg = fmod(deg, FULL_DEGREE_D);
+    if (deg < 0.0f)
+    {
+        deg += FULL_DEGREE_D;
+    }
 	return deg;
 }
 float AsoUtility::DegIn180(float deg)
 {
 	deg = DegIn360(deg);
-	if (deg > 180)
+	if (deg > HALF_DEGREE_D)
 	{
 		//-180から180の範囲に入れる
-		deg -= 360;
+		deg -= FULL_DEGREE_D;
 	}
 	return deg;
 }
@@ -120,34 +120,35 @@ float AsoUtility::RadIn2PI(float rad)
 	}
 	return rad;
 }
+
 double AsoUtility::Rad2DegD(double rad)
 {
-	return rad * (180.0 / DX_PI);
+    return rad * (HALF_DEGREE_D / DX_PI);
 }
 
 float AsoUtility::Rad2DegF(float rad)
 {
-	return rad * (180.0f / DX_PI_F);
+    return rad * (HALF_DEGREE_F / DX_PI_F);
 }
 
 int AsoUtility::Rad2DegI(int rad)
 {
-	return rad * Round(180.0f / DX_PI_F);
+    return rad * Round(HALF_DEGREE_F / DX_PI_F);
 }
 
 double AsoUtility::Deg2RadD(double deg)
 {
-	return deg * (DX_PI / 180.0);
+    return deg * (DX_PI / HALF_DEGREE_D);
 }
 
 float AsoUtility::Deg2RadF(float deg)
 {
-	return deg * (DX_PI_F / 180.0f);
+    return deg * (DX_PI_F / HALF_DEGREE_F);
 }
 
 int AsoUtility::Deg2RadI(int deg)
 {
-	return deg * Round(DX_PI_F / 180.0f);
+    return deg * Round(DX_PI_F / HALF_DEGREE_F);
 }
 
 int AsoUtility::DirNearAroundRad(float from, float to)
@@ -271,22 +272,22 @@ double AsoUtility::LerpDeg(double start, double end, double t)
     double ret;
 
     double diff = end - start;
-    if (diff < -180.0)
+    if (diff < -HALF_DEGREE_D)
     {
-        end += 360.0;
+        end += FULL_DEGREE_D;
         ret = Lerp(start, end, t);
-        if (ret >= 360.0)
+        if (ret >= FULL_DEGREE_D)
         {
-            ret -= 360.0;
+            ret -= FULL_DEGREE_D;
         }
     }
-    else if (diff > 180.0)
+    else if (diff > HALF_DEGREE_D)
     {
-        end -= 360.0;
+        end -= FULL_DEGREE_D;
         ret = Lerp(start, end, t);
         if (ret < 0.0)
         {
-            ret += 360.0;
+            ret += FULL_DEGREE_D;
         }
     }
     else
@@ -521,7 +522,7 @@ double AsoUtility::AngleDeg(const VECTOR& from, const VECTOR& to)
         dot = 1.0f;
     }
 
-    return acos(dot) * (180.0 / DX_PI);
+    return acos(dot) * (HALF_DEGREE_D / DX_PI);
 }
 
 void AsoUtility::DrawLineDir(const VECTOR& pos, const VECTOR& dir, int color, float len)
@@ -530,7 +531,7 @@ void AsoUtility::DrawLineDir(const VECTOR& pos, const VECTOR& dir, int color, fl
     auto sPos = VAdd(pos, VScale(nDir, -len));
     auto ePos = VAdd(pos, VScale(nDir, len));
     DrawLine3D(sPos, ePos, color);
-    DrawSphere3D(ePos, 5.0f, 5, color, color, true);
+    DrawSphere3D(ePos, DRAW_SPHERE_RADIUS, DRAW_SPHERE_SEGMENTS, color, color, true);
 }
 
 void AsoUtility::DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len)
@@ -540,15 +541,15 @@ void AsoUtility::DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len)
 
     // X
     dir = VTransform(AsoUtility::DIR_R, rot);
-    DrawLineDir(pos, dir, 0xff0000, len);
+    DrawLineDir(pos, dir, COLOR_RED, len);
 
     // Y
     dir = VTransform(AsoUtility::DIR_U, rot);
-    DrawLineDir(pos, dir, 0x00ff00, len);
+    DrawLineDir(pos, dir, COLOR_GREEN, len);
 
     // Z
     dir = VTransform(AsoUtility::DIR_F, rot);
-    DrawLineDir(pos, dir, 0x0000ff, len);
+    DrawLineDir(pos, dir, COLOR_BLUE, len);
 
 }
 
@@ -559,14 +560,14 @@ void AsoUtility::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len
 
     // X
     dir = rot.GetRight();
-    DrawLineDir(pos, dir, 0xff0000, len);
+    DrawLineDir(pos, dir, COLOR_RED, len);
 
     // Y
     dir = rot.GetUp();
-    DrawLineDir(pos, dir, 0x00ff00, len);
+    DrawLineDir(pos, dir, COLOR_GREEN, len);
 
     // Z
     dir = rot.GetForward();
-    DrawLineDir(pos, dir, 0x0000ff, len);
+    DrawLineDir(pos, dir, COLOR_BLUE, len);
 
 }

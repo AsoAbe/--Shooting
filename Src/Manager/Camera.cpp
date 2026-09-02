@@ -11,10 +11,10 @@
 
 Camera::Camera(void)
 {
-	pos_ = { 0,0,0 };
-	angles_ = { 0,0,0 };
-	cameraShake_ = { 0,0,0 };
-	oldMousePos_ = { 0,0 };
+	pos_ = AsoUtility::VECTOR_ZERO;
+	angles_ = AsoUtility::VECTOR_ZERO;
+	cameraShake_ = AsoUtility::VECTOR_ZERO;
+	oldMousePos_ = { 0, 0 };
 	targetCharacterPos_ = AsoUtility::VECTOR_ZERO;
 }
 
@@ -33,9 +33,10 @@ void Camera::Update(void)
 	if (mode_ == MODE::LOOK_DOWN_F && follow_ != nullptr)
 	{
 		//デグリ回転
-		constexpr float cameraRotSpdDeg = 8;
+		constexpr float cameraRotSpdDeg = FOLLOW_LOOKDOWN_ROT_SPEED_DEG;
+
 		//座標の差がこの距離より小さいなら動きを止める
-		constexpr float cameraMoveMinDiff = 400;
+		constexpr float cameraMoveMinDiff = FOLLOW_LOOKDOWN_MOVE_MIN_DIFF;
 		//相対座標
 		VECTOR diff = VSub(targetCharacterPos_, follow_->GetPos());
 		//Yの影響をなくしたベクトル
@@ -48,10 +49,10 @@ void Camera::Update(void)
 		float targetAngle = atan2f(diff.x, diff.z);
 
 		float diffDegAngle = AsoUtility::DegIn360(AsoUtility::Rad2DegF(targetAngle) - AsoUtility::Rad2DegF(angles_.y));
-		if (diffDegAngle > 180)
+		if (diffDegAngle > HALF_CIRCLE_DEG)
 		{
 			//-180から180の範囲に入れる
-			diffDegAngle -= 360;
+			diffDegAngle -= FULL_CIRCLE_DEG;
 		}
 		if (fabsf(diffDegAngle) < cameraRotSpdDeg)
 		{
@@ -66,7 +67,7 @@ void Camera::Update(void)
 			}
 			else
 			{
-				angles_.y = AsoUtility::RadIn2PI(angles_.y- AsoUtility::Deg2RadF(cameraRotSpdDeg));
+				angles_.y = AsoUtility::RadIn2PI(angles_.y - AsoUtility::Deg2RadF(cameraRotSpdDeg));
 			}
 		}
 
@@ -77,8 +78,8 @@ void Camera::SetBeforeDraw(void)
 {
 	//SetScreenでリセットされる
 	
-	//クリップ範囲を設定する
-	SetCameraNearFar(10.0f, 30000.0f);
+	// クリップ範囲を設定する
+	SetCameraNearFar(CAMERA_NEAR, CAMERA_FAR);
 	switch (mode_)
 	{
 	case MODE::FIXED_POINT:
@@ -88,7 +89,6 @@ void Camera::SetBeforeDraw(void)
 		SetBeforeDrawFree();
 		break;
 	case Camera::MODE::FOLLOW:
-		//SetBeforeDrawFollow(false);
 		SetBeforeDrawFollow(true);
 		break;
 	case Camera::MODE::LOOK_DOWN:
@@ -107,32 +107,24 @@ void Camera::Draw(void)
 {
 	if (mouseLock_)
 	{
-		DrawFormatString(0, Application::SCREEN_SIZE_Y - 16, 0xFFFF00, "マウスカーソルを表示するにはZキーを押す");
+		DrawFormatString(
+			0,
+			Application::SCREEN_SIZE_Y - CAMERA_MESSAGE_OFFSET_Y,
+			MOUSE_LOCK_MESSAGE_COLOR,
+			"マウスカーソルを表示するにはZキーを押す");
 	}
 	else
 	{
 		if (mode_ == MODE::FOLLOW)
 		{
 			//案内表示(有効なカメラモードのみ)
-			DrawFormatString(0, Application::SCREEN_SIZE_Y - 16, 0xFFFFFF, "マウス操作を有効にするにはZキーを押す");
+			DrawFormatString(
+				0,
+				Application::SCREEN_SIZE_Y - CAMERA_MESSAGE_OFFSET_Y,
+				MOUSE_UNLOCK_MESSAGE_COLOR,
+				"マウス操作を有効にするにはZキーを押す");
 		}
 	}
-	/*
-	//カメラ情報の描画
-	DrawFormatString(0, 0, 0xFFFFFF, "camera座標 %.2f,%.2f,%.2f",
-		pos_.x, pos_.y, pos_.z);
-	DrawFormatString(0, 16, 0xFFFFFF, "cameraRotation %.2f,%.2f,%.2f"
-		, AsoUtility::Rad2DegF(angles_.x)
-		, AsoUtility::Rad2DegF(angles_.y)
-		, AsoUtility::Rad2DegF(angles_.z));
-	DrawFormatString(0, 64, 0xFFFFFF, "注視点 %.2f,%.2f,%.2f",
-		GetTargetPos().x
-		, GetTargetPos().y
-		, GetTargetPos().z);
-	*/
-	//注視点の目印
-	//DrawSphere3D(GetTargetPos(), 16, 16, 0xFF0000, 0x000000, true);
-	
 }
 
 void Camera::Release(void)
@@ -140,9 +132,10 @@ void Camera::Release(void)
 }
 void Camera::UpdateCameraPos(void)
 {
-	SetCameraNearFar(10.0f, 30000.0f);
+	SetCameraNearFar(CAMERA_NEAR, CAMERA_FAR);
 	SetCameraPositionAndAngle(pos_, angles_.x, angles_.y, angles_.z);
 }
+
 VECTOR Camera::GetPos(void) const
 {
 	return pos_;
@@ -181,16 +174,19 @@ VECTOR Camera::GetTargetPos(void)
 
 void Camera::Reset()
 {
-	//リセット
+	// リセット
 	SetMouseLock(false);
-	//カメラの初期モード
-	ChangeMode(MODE::FIXED_POINT);
-	//位置
-	pos_ = { 0.0f,10.0f,-150 };
-	//角度(ラジアン)
-	angles_ = { 0.0f,0.0f,0.0f };
 
-	cameraShake_ = { 0,0,0 };
+	// カメラの初期モード
+	ChangeMode(MODE::FIXED_POINT);
+
+	// 位置
+	pos_ = DEFAULT_CAMERA_POS;
+
+	// 角度(ラジアン)
+	angles_ = DEFAULT_CAMERA_ANGLES;
+
+	cameraShake_ = DEFAULT_CAMERA_SHAKE;
 }
 
 void Camera::SetMouseLock(bool b)
@@ -230,7 +226,6 @@ void Camera::SetTargetCharacterPos(const VECTOR& pos)
 
 void Camera::SetBeforeDrawFixedPoint(void)
 {
-	//SetCameraPositionAndAngle({ 0.0f,200.0f,-500.0f }, 15.0f * DX_PI_F / 180.0f, 0, 0);
 
 	SetCameraPositionAndAngle({ pos_.x + cameraShake_.x,pos_.y,pos_.z }
 	, angles_.x, angles_.y, angles_.z);
@@ -240,35 +235,35 @@ void Camera::SetBeforeDrawFree(void)
 {
 	auto& ins = InputManager::GetInstance();
 
-	float movePow = 16.0f;
-	float rotPaw = 1.0f * DX_PI_F / 180.0f;
+	float movePow = FREE_CAMERA_MOVE_SPEED;
+	float rotPaw = FREE_CAMERA_ROT_SPEED_DEG * DX_PI_F / 180.0f;
 
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
 	if (ins.IsNew(KEY_INPUT_E))
 	{
-		dir = VAdd(dir, { 0,1,0 });
+		dir = VAdd(dir, FREE_CAMERA_MOVE_UP);
 	}
 	if (ins.IsNew(KEY_INPUT_Q))
 	{
-		dir = VAdd(dir, { 0,-1,0 });
+		dir = VAdd(dir, FREE_CAMERA_MOVE_DOWN);
 	}
 
 	if (ins.IsNew(KEY_INPUT_W))
 	{
-		dir = VAdd(dir, { 0,0,1 });
+		dir = VAdd(dir, FREE_CAMERA_MOVE_FORWARD);
 	}
 	if (ins.IsNew(KEY_INPUT_S))
 	{
-		dir = VAdd(dir, { 0,0,-1 });
+		dir = VAdd(dir, FREE_CAMERA_MOVE_BACK);
 	}
 	if (ins.IsNew(KEY_INPUT_A))
 	{
-		dir = VAdd(dir, { -1,0,0 });
+		dir = VAdd(dir, FREE_CAMERA_MOVE_LEFT);
 	}
 	if (ins.IsNew(KEY_INPUT_D))
 	{
-		dir = VAdd(dir, { 1,0,0 });
+		dir = VAdd(dir, FREE_CAMERA_MOVE_RIGHT);
 	}
 
 	if (AsoUtility::EqualsVZero(dir) == false)
@@ -277,9 +272,7 @@ void Camera::SetBeforeDrawFree(void)
 
 		//平面移動の場合はXZを無視
 
-		//mat = MMult(mat, MGetRotX(angles_.x));
 		mat = MMult(mat, MGetRotY(angles_.y));
-		//mat = MMult(mat, MGetRotZ(angles_.z));
 
 		VECTOR moveDir = VTransform(dir, mat);
 		pos_ = VAdd(pos_, VScale(moveDir, movePow));
@@ -310,8 +303,8 @@ void Camera::SetBeforeDrawFollow(bool forward)
 	auto& ins = InputManager::GetInstance();
 	
 	
-	int mouseMoveX = 0;
-	int mouseMoveY = 0;
+	int mouseMoveX = NO_MOUSE_MOVEMENT;
+	int mouseMoveY = NO_MOUSE_MOVEMENT;
 
 	//トグル
 	if (ins.IsTrgDown(KEY_INPUT_Z))
@@ -333,17 +326,19 @@ void Camera::SetBeforeDrawFollow(bool forward)
 	else
 	{
 		//入力しない
-		mouseMoveX = 0;
-		mouseMoveY = 0;
+		mouseMoveX = NO_MOUSE_MOVEMENT;
+		mouseMoveY = NO_MOUSE_MOVEMENT;
 	}
 
-	float rotPaw = 2.0f * DX_PI_F / 180.0f;
-	float rotPawMouse = 0.05f;
+	float rotPaw =
+		FOLLOW_CAMERA_ROT_SPEED_DEG * DX_PI_F / 180.0f;
+
+	float rotPawMouse = MOUSE_ROT_SCALE;
 
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
 	//カメラ回転
-	if (mouseMoveY != 0)
+	if (mouseMoveY != NO_MOUSE_MOVEMENT)
 	{
 		angles_.x += mouseMoveY * rotPaw* rotPawMouse;
 	}
@@ -368,7 +363,7 @@ void Camera::SetBeforeDrawFollow(bool forward)
 		angles_.x = ANGLE_X_MAX;
 	}
 	//y軸回転
-	if (mouseMoveX != 0)
+	if (mouseMoveX != NO_MOUSE_MOVEMENT)
 	{
 		angles_.y += mouseMoveX * rotPaw * rotPawMouse;
 	}
@@ -394,7 +389,7 @@ void Camera::SetBeforeDrawFollow(bool forward)
 	MATRIX mat = MGetIdent();
 
 	//yを180度反対に
-	float revAngleY = angles_.y + AsoUtility::DegToRadF(180.0f);
+	float revAngleY = angles_.y + AsoUtility::DegToRadF(REVERSE_ANGLE_Y_DEG);
 
 	//XとYを適用
 	if (forward == false)
@@ -404,7 +399,7 @@ void Camera::SetBeforeDrawFollow(bool forward)
 	else
 	{
 		//注視点を考慮する場合はxを反転
-		mat = MMult(mat, MGetRotX(angles_.x * -1));
+		mat = MMult(mat, MGetRotX(-angles_.x));
 	}
 	mat = MMult(mat, MGetRotY(revAngleY));
 
@@ -413,8 +408,7 @@ void Camera::SetBeforeDrawFollow(bool forward)
 	//ローカル座標を回転させる
 	localPos = VTransform(localPos, mat);
 	
-	////高さはここで加算
-	//localPos.y += HEIGHT;
+	
 	//最終的なカメラの位置を設定
 	pos_ = VAdd(followPos, localPos);
 
@@ -439,16 +433,12 @@ void Camera::SetBeforeDrawFollow(bool forward)
 
 	// カメラの設定(位置と回転による制御)
 	SetCameraPositionAndAngle(pos_, angles_.x, angles_.y, angles_.z);
-	//// カメラの設定(位置と注視点による制御)
-	//SetCameraPositionAndTargetAndUpVec(pos_,
-	//	targetPos_,
-	//	{ 0.0f, 1.0f, 0.0f });
 
 }
 
 void Camera::SetBeforeDrawLookDown()
 {
-	angles_.x = AsoUtility::Deg2RadF(30);
+	angles_.x = AsoUtility::Deg2RadF(CAMERAANGLE_LOOKDOWN_X);
 	angles_.y = 0;
 	angles_.z = 0;
 
@@ -461,9 +451,9 @@ void Camera::SetBeforeDrawLookDown()
 	offsetPos = VTransform(offsetPos, MGetRotY(angles_.y));
 	if (follow_ != nullptr)
 	{
-		followPos = VAdd(follow_->GetPos(), { 0,HEIGHT,200 });
+		followPos = VAdd(follow_->GetPos(), { 0,HEIGHT,LOOKDOWN_FOLLOW_OFFSET_Z });
 	}
-	VECTOR localPos = { 0,0,800.0f };
+	VECTOR localPos = LOOKDOWN_LOCAL_POS;
 	localPos = VTransform(localPos, mat);
 	//最終的なカメラの位置を設定
 	pos_ = VAdd(followPos, localPos);
@@ -477,8 +467,7 @@ void Camera::SetBeforeDrawFollowLookDown()
 {
 	angles_.x = AsoUtility::Deg2RadF(CAMERAANGLE_LOOKDOWN_X);
 	//相対座標
-	/*VECTOR diff = VSub(targetCharacterPos_,follow_->GetPos());
-	angles_.y = atan2f(diff.x, diff.z);*/
+	
 	angles_.z = 0;
 
 
@@ -509,5 +498,12 @@ void Camera::SetBeforeDrawFollowLookDown()
 
 void Camera::SetCameraShake(void)
 {
-	cameraShake_ = { static_cast<float>(GetRand(8) - 4),0,0 };
+	cameraShake_ =
+	{
+		static_cast<float>(
+			GetRand(CAMERA_SHAKE_MAX) -
+			CAMERA_SHAKE_OFFSET),
+		0.0f,
+		0.0f
+	};
 }

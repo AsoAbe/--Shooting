@@ -3,6 +3,31 @@
 
 struct ScoreData
 {
+	// スコアランキングの最大保存数
+	static constexpr size_t MAX_SCORE_COUNT = 5;
+
+	// スコア表示の1行あたりの高さ
+	static constexpr int SCORE_LINE_HEIGHT = 40;
+
+	// スコア表示の順位とスコアの間隔
+	static constexpr int SCORE_SPACING = 10;
+
+	// スコア表示の順位
+	static constexpr int FIRST_RANK = 1;
+
+	// スコア表示の文字色
+	static constexpr int LABEL_COLOR = 200;
+	static constexpr int SCORE_COLOR = 255;
+
+	// スコア表示の色成分
+	static constexpr int COLOR_COMPONENT_COUNT = 3;
+
+	// 初期スコア
+	static constexpr int INITIAL_SCORE = 0;
+
+	// 初期進行率
+	static constexpr float INITIAL_PROGRESSION = 0.0f;
+
 	/// <summary>
 	/// 計算結果。マイナスの場合はスコアを一括で非表示とする。
 	/// </summary>

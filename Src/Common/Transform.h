@@ -14,7 +14,17 @@ class Transform
 {
 
 public:
+	// 無効なモデルハンドル
+	static constexpr int INVALID_MODEL_ID = -1;
 
+	// コライダー設定時の対象モデル全体
+	static constexpr int COLLISION_TARGET_ALL = -1;
+
+	// コライダー設定時の判定数
+	static constexpr int COLLISION_DIVISION_COUNT = 1;
+
+	// コライダー設定時の判定フラグ
+	static constexpr int COLLISION_ENABLED = 1;
 	// コンストラクタ
 	Transform(void);
 	Transform(int model);

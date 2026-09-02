@@ -5,15 +5,19 @@
 
 void ScoreData::AddScore(int score)
 {
-   LoadScoreBoard();
+    LoadScoreBoard();
+
     auto it = std::find_if(scoreBoard_.begin(), scoreBoard_.end(),
         [&](int s) {
             return score > s;
         });
 
-    if (it != scoreBoard_.end() || scoreBoard_.size() < 5) {
+    if (it != scoreBoard_.end() || scoreBoard_.size() < MAX_SCORE_COUNT)
+    {
         scoreBoard_.insert(it, score);
-        if (scoreBoard_.size() > 5) {
+
+        if (scoreBoard_.size() > MAX_SCORE_COUNT)
+        {
             scoreBoard_.pop_back(); // 最下位を削除
         }
     }
@@ -35,16 +39,6 @@ void ScoreData::SaveScoreBoard()
 
     fclose(fp);
 
-    /*FILE* fp = nullptr;
-    if (fopen_s(&fp, "scoreboard.dat", "wb") != 0 || fp == nullptr) {
-        return;
-    }
-
-    uint32_t count = static_cast<uint32_t>(scoreBoard_.size());
-    fwrite(&count, sizeof(count), 1, fp);
-    fwrite(scoreBoard_.data(), sizeof(int), count, fp);
-
-    fclose(fp);*/
 }
 
 void ScoreData::LoadScoreBoard()
@@ -55,82 +49,112 @@ void ScoreData::LoadScoreBoard()
     }
 
     scoreBoard_.clear();
-    int score = 0;
+    int score = INITIAL_SCORE;
     while (fscanf_s(fp, "%5d", &score) == 1) {
         scoreBoard_.push_back(score);
-        if (scoreBoard_.size() >= 5) break; // 最大5件まで
+        if (scoreBoard_.size() >= MAX_SCORE_COUNT) break; // 最大5件まで
     }
 
     fclose(fp);
 
-    /*int handle = FileRead_open("scoreboard.txt");
-    if (handle == 0) {
-        return;
-    }
-
-    uint32_t count = 0;
-    FileRead_read(&count, sizeof(count), handle);
-
-    scoreBoard_.resize(count);
-    FileRead_read(scoreBoard_.data(), sizeof(int) * count, handle);
-
-    FileRead_close(handle);*/
 }
 
 void ScoreData::DrawScoreBoard(int screenW, int startY, int fontHandle, const std::vector<int>& scores)
 {
-    LoadScoreBoard();
-    const int lineHeight = 40;
-    const int spacing = 10;
-    //const int lineHeight = 30;
+	LoadScoreBoard();
 
-    // 最大文字幅を計算（全行で同じ幅にするため）
-    int maxLabelWidth = 0;
-    int maxScoreWidth = 0;
+	// 最大文字幅を計算（全行で同じ幅にするため）
+	int maxLabelWidth = INITIAL_SCORE;
+	int maxScoreWidth = INITIAL_SCORE;
 
-    for (int i = 0; i < scores.size(); ++i) {
-        char labelBuf[32];
-        sprintf_s(labelBuf, "%2d位 :", i + 1);
+	for (size_t i = INITIAL_SCORE; i < scores.size(); ++i)
+	{
+		char labelBuf[32];
+		sprintf_s(labelBuf, "%2d位 :", static_cast<int>(i) + FIRST_RANK);
 
-        char scoreBuf[32];
-        sprintf_s(scoreBuf, "%5d 点", scores[i]);
+		char scoreBuf[32];
+		sprintf_s(scoreBuf, "%5d 点", scores[i]);
 
-        int labelWidth = GetDrawStringWidthToHandle(labelBuf, strlen(labelBuf), fontHandle);
-        int scoreWidth = GetDrawStringWidthToHandle(scoreBuf, strlen(scoreBuf), fontHandle);
+		int labelWidth =
+			GetDrawStringWidthToHandle(
+				labelBuf,
+				strlen(labelBuf),
+				fontHandle);
 
-        if (labelWidth > maxLabelWidth) maxLabelWidth = labelWidth;
-        if (scoreWidth > maxScoreWidth) maxScoreWidth = scoreWidth;
-    }
+		int scoreWidth =
+			GetDrawStringWidthToHandle(
+				scoreBuf,
+				strlen(scoreBuf),
+				fontHandle);
 
-    int totalLineWidth = maxLabelWidth + spacing + maxScoreWidth;
-    int baseX = screenW / 2 - totalLineWidth / 2;
+		if (labelWidth > maxLabelWidth)
+		{
+			maxLabelWidth = labelWidth;
+		}
 
-    // 描画ループ
-    for (int i = 0; i < scores.size(); ++i) {
-        int y = startY + lineHeight * i;
+		if (scoreWidth > maxScoreWidth)
+		{
+			maxScoreWidth = scoreWidth;
+		}
+	}
 
-        // ラベル（順位）
-        char labelBuf[32];
-        sprintf_s(labelBuf, "%2d位 :", i + 1);
+	int totalLineWidth =
+		maxLabelWidth +
+		SCORE_SPACING +
+		maxScoreWidth;
 
-        // スコア
-        char scoreBuf[32];
-        sprintf_s(scoreBuf, "%5d 点", scores[i]);
+	int baseX =
+		screenW / 2 -
+		totalLineWidth / 2;
 
-        DrawStringToHandle(baseX, y , labelBuf, GetColor(200, 200, 200), fontHandle);
-        DrawStringToHandle(baseX + maxLabelWidth + spacing, y, scoreBuf, GetColor(255, 255, 255), fontHandle);
-    }
+	// 描画ループ
+	for (size_t i = INITIAL_SCORE; i < scores.size(); ++i)
+	{
+		int y =
+			startY +
+			SCORE_LINE_HEIGHT * static_cast<int>(i);
+
+		// ラベル（順位）
+		char labelBuf[32];
+		sprintf_s(
+			labelBuf,
+			"%2d位 :",
+			static_cast<int>(i) + FIRST_RANK);
+
+		// スコア
+		char scoreBuf[32];
+		sprintf_s(scoreBuf, "%5d 点", scores[i]);
+
+		DrawStringToHandle(
+			baseX,
+			y,
+			labelBuf,
+			GetColor(
+				LABEL_COLOR,
+				LABEL_COLOR,
+				LABEL_COLOR),
+			fontHandle);
+
+		DrawStringToHandle(
+			baseX + maxLabelWidth + SCORE_SPACING,
+			y,
+			scoreBuf,
+			GetColor(
+				SCORE_COLOR,
+				SCORE_COLOR,
+				SCORE_COLOR),
+			fontHandle);
+	}
 }
 
 ScoreData::ScoreData()
 {
-	this->resultScore = 0;
-	this->timeS = 0;
-	this->targetProgression = 0.0f;
-	this->timeScore = 0;
-	this->winScore = 0;
-	this->perfectScore = 0;
-	this->lifeScore = 0;
-	this->lifeScoreNum = 0;
-   
+	this->resultScore = INITIAL_SCORE;
+	this->timeS = INITIAL_PROGRESSION;
+	this->targetProgression = INITIAL_PROGRESSION;
+	this->timeScore = INITIAL_SCORE;
+	this->winScore = INITIAL_SCORE;
+	this->perfectScore = INITIAL_SCORE;
+	this->lifeScore = INITIAL_SCORE;
+	this->lifeScoreNum = INITIAL_SCORE;
 }

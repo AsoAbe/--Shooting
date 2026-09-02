@@ -15,6 +15,38 @@ public:
 		int r, g, b;
 		IntRGB(int r, int g, int b);
 	};
+	// HPバーのグラデーション分割数
+	static constexpr int GLOSSY_GRADIENT_COUNT = 16;
+
+	// HPバーのグラデーションの暗さ
+	static constexpr float GLOSSY_DARKEN_RATE = 0.4f;
+
+	// HPバーの枠線の色
+	static constexpr int BAR_FRAME_RED = 206;
+	static constexpr int BAR_FRAME_GREEN = 168;
+	static constexpr int BAR_FRAME_BLUE = 78;
+
+	// 黒色
+	static constexpr unsigned int BLACK_COLOR = 0x000000;
+
+	// HPバー画像を震わせる幅
+	static constexpr int SHAKE_WIDTH = 4;
+
+	// 無効な画像ハンドル
+	static constexpr int INVALID_IMAGE_HANDLE = -1;
+
+	// 空のバーの値
+	static constexpr float EMPTY_BAR_VALUE = 0.0f;
+
+	// Lerpの開始値・終了値
+	static constexpr float LERP_START = 0.0f;
+	static constexpr float LERP_END = 1.0f;
+
+	// 画像描画時の倍率
+	static constexpr double BAR_IMAGE_DRAW_SCALE = 2.0;
+
+	// 画像描画時の回転角度
+	static constexpr double BAR_IMAGE_ROTATION = 0.0;
 
 	//主にDrawStringの改行に使う
 	static constexpr int DEFAULT_TEXT_SIZE = 16;
