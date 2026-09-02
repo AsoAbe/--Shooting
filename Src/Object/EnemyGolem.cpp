@@ -69,7 +69,14 @@ void EnemyGolem::Draw()
 	else
 	{
 #ifdef _DEBUG
-		DrawSphere3D(transform_.pos, 32, 8, 0xFF0000, 0xFFFFFF, true);
+		DrawSphere3D(
+			transform_.pos,
+			DEBUG_SPHERE_RADIUS,
+			DEBUG_SPHERE_SEGMENTS,
+			DEBUG_SPHERE_INNER_COLOR,
+			DEBUG_SPHERE_OUTER_COLOR,
+			true
+		);
 #endif
 	}
 	
@@ -89,16 +96,12 @@ void EnemyGolem::Update_Move()
 	{
 	case StandardBoss::ATTACK_STATE::POWER_CHARGING:
 	case StandardBoss::ATTACK_STATE::DASH:
-		//animationController_->Play(ANIM::RUN);
 	break;
 	case StandardBoss::ATTACK_STATE::RANDOM_MOVING:
 	case StandardBoss::ATTACK_STATE::RANDOM:
 	case ATTACK_STATE::AROUND_MOVING:
 	case ATTACK_STATE::AROUND:
-		
-		//std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		animationController_->Play(ANIM::ATTACK3);
-
 		break;
 	default:
 		break;
@@ -110,6 +113,7 @@ void EnemyGolem::AttackUpdate_Dash()
 	animationController_->Play(ANIM::RUN);
 	StandardBoss::AttackUpdate_Dash();
 }
+
 void EnemyGolem::AttackUpdate_Return()
 {
 	//プレイヤーの方向を向きつつ直立する
@@ -121,6 +125,7 @@ void EnemyGolem::AttackUpdate_Return()
 	transform_.quaRot = Quaternion::Euler(0, atan2(Dir_.x, Dir_.z), 0);
 	StandardBoss::AttackUpdate_Return();
 }
+
 void EnemyGolem::AttackUpdate_PowerCharging()
 {
 	//プレイヤー方向を向く
@@ -130,11 +135,13 @@ void EnemyGolem::AttackUpdate_PowerCharging()
 	transform_.quaRot = Quaternion::Euler(0, atan2(Dir_.x, Dir_.z), 0);
 	StandardBoss::AttackUpdate_PowerCharging();
 }
+
 void EnemyGolem::DashTurn(const VECTOR& diffXZ)
 {
 	transform_.quaRot = Quaternion::Euler(0, atan2(diffXZ.x, diffXZ.z), 0);
 	StandardBoss::DashTurn(diffXZ);
 }
+
 void EnemyGolem::ChangeState_PowerCharging(const VECTOR& diff)
 {
 	animationController_->Play(ANIM::IDLE);
@@ -151,19 +158,4 @@ void EnemyGolem::Died()
 	}
 	animationController_->Play(ANIM::DOWN,false);
 	died_ = true;
-	//SetActive(false);
 }
-//Vector2 Ap_ = AngPos_.ToVector2();
-//
-//Vector2 Mp = sceneGame_->GetMousePos();
-//
-//Position2 targetPos(Mp.x, Mp.y);
-//Vector2 lookAt = targetPos - Ap_;
-//Angle = atan2(lookAt.y, lookAt.x);   //マウスの方向に回転
-
-//
-//void EnemyGolem::Mv1Scale()
-//{
-//	// モデルを2倍の大きさにする
-//	MV1SetScale(modelId_, VGet(2.0f, 2.0f, 2.0f));
-//}

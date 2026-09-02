@@ -11,10 +11,9 @@ LowDamageShot::LowDamageShot(SceneGame* parent, const ObjectModelData& model) : 
 void LowDamageShot::SetParam()
 {
 	isPlayerTag_ = false;
-	speed_ = 16;
-	colRadius_ = 80;
+	speed_ = LOW_DAMAGE_SHOT_SPEED;
+	colRadius_ = LOW_DAMAGE_SHOT_COL_RADIUS;
 	shotTimer_ = DEFAULT_SHOT_TIME;
-	//damage_ = 6;
 }
 
 void LowDamageShot::Move()

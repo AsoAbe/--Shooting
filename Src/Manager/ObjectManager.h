@@ -25,9 +25,62 @@ public:
 		TEST			//テスト用
 	};
 
-	/// <summary>
-	/// 弾などの最大生成数
-	/// </summary>
+	// 無効なインデックス
+	static constexpr int INVALID_INDEX = -1;
+
+	// 影のデフォルト半径
+	static constexpr float DEFAULT_SHADOW_RADIUS = 60.0f;
+
+	// 影を描画する際の下方向の距離
+	static constexpr float SHADOW_LINE_LENGTH_DOWN = 1000.0f;
+
+	// 影を描画する際の上方向の距離
+	static constexpr float SHADOW_LINE_LENGTH_UP = 40.0f;
+
+	// 影のアルファ値
+	static constexpr int SHADOW_ALPHA = 114;
+
+	// 影の頂点で使用するポリゴンの頂点数
+	static constexpr int SHADOW_POLYGON_VERTEX_COUNT = 3;
+
+	// 影を地面から浮かせる高さ
+	static constexpr float SHADOW_Y_OFFSET = 4.0f;
+
+	// 影の地面判定を分割する回数
+	static constexpr int SHADOW_DIVISION_COUNT = 16;
+
+	// 1回あたりの影の角度
+	static constexpr float SHADOW_DIVISION_ANGLE =
+		360.0f / SHADOW_DIVISION_COUNT;
+
+	// 地面に当たらなかった場合の初期Y座標
+	static constexpr float NO_GROUND_Y = -1.0f;
+
+	// 影のテクスチャ座標の中心
+	static constexpr float SHADOW_UV_CENTER = 0.5f;
+
+	// 影のテクスチャ座標の半分
+	static constexpr float SHADOW_UV_HALF = 0.5f;
+
+	// 影の法線方向
+	static constexpr float SHADOW_NORMAL_Z = -1.0f;
+
+	// 影のスペキュラ色のアルファ値
+	static constexpr int SHADOW_SPECULAR_ALPHA = 0;
+
+	// 影のテクスチャ座標
+	static constexpr float SHADOW_UV_ZERO = 0.0f;
+
+	// ダメージ判定時の接触ダメージ
+	static constexpr int DAMAGE_HIT = 2;
+
+	// エフェクトの大きさ（敵弾・プレイヤー）
+	static constexpr float HIT_EFFECT_SCALE = 0.8f;
+
+	// エフェクトの大きさ（プレイヤー弾）
+	static constexpr float ENEMY_HIT_EFFECT_SCALE = 0.4f;
+
+	// 弾などの最大生成数
 	static constexpr int INSTANCE_MAX = 999;
 
 	//初期化
@@ -148,10 +201,6 @@ private:
 
 	//キャラの足元の影
 	int shadowGraph_;
-
-	////MV1DuplicateModelで使用
-	//int shotModelId_;
-	//int rockModelId_;
 
 	//キャラクターのロード
 	void LoadPlayerModel();

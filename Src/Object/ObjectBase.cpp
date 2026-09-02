@@ -1,4 +1,3 @@
-
 #include "../Common/AsoUtility.h"
 #include "../Application.h"
 #include "../Common/ObjectModelData.h"
@@ -12,10 +11,10 @@ ObjectBase::ObjectBase(const ObjectModelData& modelData) :baseModel_(modelData)
 {
     pos_ = AsoUtility::VECTOR_ZERO;
     rot_ = AsoUtility::VECTOR_ZERO;
-    scale_ = { 1,1,1 };
+    scale_ = DEFAULT_SCALE;
     vec_ = AsoUtility::VECTOR_ZERO;
     localPos_ = AsoUtility::VECTOR_ZERO;
-    modelId_ = -1;
+    modelId_ = INVALID_MODEL_ID;
 
     quaRot_ = Quaternion::Identity();
     quaLocalRot_ = Quaternion::Euler(baseModel_.modelRot_);
@@ -35,14 +34,20 @@ void ObjectBase::Init(void)
    
     // モデルの読込(複製)
     modelId_ = MV1DuplicateModel(baseModel_.model_);
-    //マテリアルの環境光を設定
-    MV1SetMaterialAmbColor(modelId_, 0, GetColorF(0.5f, 0.5f, 0.5f, 1));
+    // マテリアルの環境光を設定
+    MV1SetMaterialAmbColor(
+        modelId_,
+        DEFAULT_MATERIAL_INDEX,
+        GetColorF(
+            MATERIAL_AMBIENT_R,
+            MATERIAL_AMBIENT_G,
+            MATERIAL_AMBIENT_B,
+            MATERIAL_AMBIENT_A
+        )
+    );
 
     //マトリクスでモデルを制御
     SetMatrixModel();
-
-    ////回転を設定
-    //SetRotation();
 
     //有効化する
     isActive_ = true;
@@ -75,7 +80,7 @@ void ObjectBase::Release(void)
 {
     // モデルのメモリ解放
     MV1DeleteModel(modelId_);
-    modelId_ = -1;
+    modelId_ = INVALID_MODEL_ID;
     // 物理演算の状態をリセット
     MV1PhysicsResetState(modelId_);
 }

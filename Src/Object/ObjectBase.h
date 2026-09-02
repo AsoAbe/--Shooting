@@ -10,6 +10,22 @@ class ObjectModelData;
 class ObjectBase
 {
 public:
+	// 無効なモデルハンドル
+	static constexpr int INVALID_MODEL_ID = -1;
+
+	// モデルのマテリアル環境光
+	static constexpr float MATERIAL_AMBIENT_R = 0.5f;
+	static constexpr float MATERIAL_AMBIENT_G = 0.5f;
+	static constexpr float MATERIAL_AMBIENT_B = 0.5f;
+	static constexpr float MATERIAL_AMBIENT_A = 1.0f;
+
+	// マテリアル番号
+	static constexpr int DEFAULT_MATERIAL_INDEX = 0;
+
+	//基本的な大きさ
+	static constexpr VECTOR DEFAULT_SCALE = { 1.0f,1.0f,1.0f };
+
+
 	ObjectBase(const ObjectModelData& modelData);
 	virtual ~ObjectBase(void);
 	virtual void Init(void);

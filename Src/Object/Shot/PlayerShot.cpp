@@ -13,10 +13,10 @@ PlayerShot::PlayerShot(SceneGame* parent, const ObjectModelData& model) : ShotBa
 void PlayerShot::SetParam()
 {
 	isPlayerTag_ = true;
-	speed_ = 40;
-	colRadius_ = 80;
-	shotTimer_ = 1.6f;
-	damage_ = 1;
+	speed_ = PLAYER_SHOT_SPEED;
+	colRadius_ = PLAYER_SHOT_COL_RADIUS;
+	shotTimer_ = PLAYER_SHOT_TIME;
+	damage_ = PLAYER_SHOT_DAMAGE;
 }
 
 void PlayerShot::Move()
@@ -27,9 +27,9 @@ void PlayerShot::Move()
 void PlayerShot::SetPosOnGround()
 {
 	//’nŒ`‚É‰ˆ‚¤
-	constexpr float LINE_LENGTH = 500;
-	constexpr float POS_Y = 100;
-	constexpr float RANGE = 100;
+	constexpr float LINE_LENGTH = GROUND_LINE_LENGTH;
+	constexpr float POS_Y = GROUND_HEIGHT_OFFSET;
+	constexpr float RANGE = GROUND_FOLLOW_RANGE;
 	float newPosY = sceneGame_->GetOManager()->GetOnGroundY(GetPos(), LINE_LENGTH, LINE_LENGTH) + POS_Y;
 	if (fabs(pos_.y - newPosY) > RANGE)
 	{

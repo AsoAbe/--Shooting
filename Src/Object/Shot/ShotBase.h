@@ -8,6 +8,60 @@ class ShotBase :
 {
 public:
 	/// <summary>
+	/// 弾の初期タイマー
+	/// </summary>
+	static constexpr float INITIAL_SHOT_TIMER = 0.0f;
+
+	/// <summary>
+	/// 弾の初期移動速度
+	/// </summary>
+	static constexpr float INITIAL_SPEED = 1.0f;
+
+	/// <summary>
+	/// 弾の初期当たり判定半径
+	/// </summary>
+	static constexpr float INITIAL_COL_RADIUS = 1.0f;
+
+	/// <summary>
+	/// 地面判定に使用する距離
+	/// </summary>
+	static constexpr float GROUND_LINE_LENGTH = 500.0f;
+
+	/// <summary>
+	/// 地面から弾を浮かせる高さ
+	/// </summary>
+	static constexpr float GROUND_HEIGHT_OFFSET = 100.0f;
+
+	/// <summary>
+	/// 当たり判定球の分割数
+	/// </summary>
+	static constexpr int COLLISION_SPHERE_SEGMENTS = 8;
+
+	/// <summary>
+	/// 弾の更新に使用する時間間隔
+	/// <summary>
+	static constexpr float UPDATE_TIME_SCALE = 1.0f;
+
+	/// <summary>
+	// 当たり判定を描画する際のプレイヤー側の色
+	/// <summary>
+	static constexpr unsigned int PLAYER_COLLISION_COLOR = 0x0000FF;
+
+	/// <summary>
+	// 当たり判定を描画する際の敵側の色
+	/// <summary>
+	static constexpr unsigned int ENEMY_COLLISION_COLOR = 0xFF0000;
+
+	/// <summary>
+	// 当たり判定を描画する際の外枠の色
+	/// <summary>
+	static constexpr unsigned int COLLISION_OUTLINE_COLOR = 0xFFFFFF;
+
+	/// <summary>
+	/// 弾の非アクティブ化エフェクトの大きさ
+	/// </summary>
+	static constexpr float DEACTIVATE_EFFECT_SCALE = 0.5f;
+	/// <summary>
 	/// コンストラクタ
 	/// </summary>
 	/// <param name="parent">SceneGame</param>
@@ -24,6 +78,10 @@ public:
 	/// </summary>
 	static constexpr int DEFAULT_DAMAGE = 8;
 
+	/// <summary>
+	/// 通常弾の当たり判定半径
+	/// </summary>
+	static constexpr float DEFAULT_COL_RADIUS = 80.0f;
 
 	/// <summary>
 	/// Init後にActivationを呼ぶ

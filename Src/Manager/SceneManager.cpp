@@ -17,23 +17,22 @@ SceneManager* SceneManager::instance_ = nullptr;
 //コンストラクタ
 SceneManager::SceneManager(void)
 {
-	mainScreen_ = -1;
+	mainScreen_ = INVALID_GRAPH_HANDLE;
 	fader_ = nullptr;
 	scene_ = nullptr;
 	sceneID_ = SCENE_ID::NONE;
 	waitSceneID_ = SCENE_ID::NONE;
 	isSceneChanging_ = false;
 	backgroundColor_ = 0xFFFFFF;
-	testImg_ = -1;
-	bgmChang_ = -1;
-	//testPlayingEffect_ = -1;
-	//testEffect_ = -1;
+	testImg_ = INVALID_GRAPH_HANDLE;
+	bgmChang_ = INVALID_GRAPH_HANDLE;
+	
 }
 //デストラクタ
 SceneManager::~SceneManager(void)
 {
 	DeleteGraph(mainScreen_);
-	mainScreen_ = -1;
+	mainScreen_ = INVALID_GRAPH_HANDLE;
 }
 //インスタンスの生成(シングルトン)
 void SceneManager::CreateInstance(void)
@@ -62,8 +61,16 @@ void SceneManager::Destroy(void)
 
 void SceneManager::Init3D()
 {
-	backgroundColor_ = GetColor(138, 190, 222);
-	SetBackgroundColor(138, 190, 222);
+	backgroundColor_ = GetColor(
+		BACKGROUND_COLOR_R,
+		BACKGROUND_COLOR_G,
+		BACKGROUND_COLOR_B
+	);
+	SetBackgroundColor(
+		BACKGROUND_COLOR_R,
+		BACKGROUND_COLOR_G,
+		BACKGROUND_COLOR_B
+	);
 
 	//zバッファ有効化
 	SetUseZBuffer3D(true);
@@ -76,29 +83,30 @@ void SceneManager::Init3D()
 	//ライトを有効にする
 	SetUseLighting(true);
 	//グローバルアンビエントライトカラー
-	SetGlobalAmbientLight(GetColorF(0.2f, 0.2f, 0.2f,1));
+	SetGlobalAmbientLight(GetColorF(
+		AMBIENT_LIGHT_R,
+		AMBIENT_LIGHT_G,
+		AMBIENT_LIGHT_B,
+		AMBIENT_LIGHT_A
+	));
 	//ディレクショナルライトの方向の設定(正規化されていなくても良い)
 	//正面から斜め下に向かったライト
-	ChangeLightTypeDir({ 0,-1,1 });
-	//----------
-	/*
-	//スポットライト
-	ChangeLightTypeSpot(
-		{ 0.0f, 50.0f, 0.0f },
-		{ -45.0f, 0.0f, 0.f },
-		10.0f, 0.0f,
-		200.0f, 0.000f, 0.001f, 0.000f);*/
-
-		//ポイントライト
-		/*ChangeLightTypePoint({ -2000.0f,500.0f,0.0f }, 600.0f, 0.000f, 0.001f, 0.000f);
-
-		pointLight1_ = CreatePointLightHandle({ 0.0f,60.0f,0.0f },
-			600.0f, 0.000f, 0.001f, 0.000f);*/
-
-
+	ChangeLightTypeDir({
+		LIGHT_DIRECTION_X,
+		LIGHT_DIRECTION_Y,
+		LIGHT_DIRECTION_Z
+		});
+	
 	SetFogEnable(true);
-	SetFogColor(110, 152, 178);
-	SetFogStartEnd(8000.0f, 10000.0f);
+	SetFogColor(
+		FOG_COLOR_R,
+		FOG_COLOR_G,
+		FOG_COLOR_B
+	);
+	SetFogStartEnd(
+		FOG_START_DISTANCE,
+		FOG_END_DISTANCE
+	);
 }
 
 void SceneManager::BgmChang(std::string name)
@@ -132,9 +140,7 @@ bool SceneManager::Init(void)
 
 	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
 
-	//エフェクト
-	//testEffect_ = LoadEffekseerEffect("Effect/explosionY.efkefc", 80.0f);
-	//testPlayingEffect_ = -1;
+	
 	return true;
 }
 //更新
@@ -167,13 +173,6 @@ void SceneManager::Update(void)
 
 	auto& ins = InputManager::GetInstance();
 
-	//if (ins.IsTrgDown(KEY_INPUT_LSHIFT))
-	//{
-	//	//testPlayingEffect_ = PlayEffekseer3DEffect(testEffect_);
-	//}
-	////エフェクトの座標
-	//SetPosPlayingEffekseer3DEffect(testPlayingEffect_, 0, 0, 0);
-	
 	// Effekseerにより再生中のエフェクトを更新する。
 	UpdateEffekseer3D();
 }
@@ -191,8 +190,6 @@ void SceneManager::Draw(void)
 	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, backgroundColor_,true);
 	
 	camera_->SetBeforeDraw();
-
-
 
 	//シーン描画
 	scene_->Draw();
@@ -364,6 +361,6 @@ void SceneManager::ReleaseScene(void)
 	{
 		scene_->Release();
 		delete scene_;
-		scene_ = nullptr;//ヌルポインター
+		scene_ = nullptr;
 	}
 }

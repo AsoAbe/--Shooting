@@ -20,13 +20,12 @@ Map::~Map()
 bool Map::Init()
 {
 	//ここまでステージの描画、当たり判定
-	//mapBaseModel[1] = MV1LoadModel((Application::PATH_MODEL + "cube.mv1").c_str());
 	transform_.SetModel(
 		MV1LoadModel((Application::PATH_STAGE + "Stage.mv1").c_str()));
 
 	transform_.scl = AsoUtility::VECTOR_ONE;
 	transform_.quaRot = Quaternion();
-	transform_.pos = { 0.0f, -100.0f, 0.0f };
+	transform_.pos = { BASE_GROUND_POS_Y, STAGE_POS_Y, BASE_GROUND_POS_Y };
 
 	// 当たり判定(コライダ)作成
 	transform_.MakeCollider(Collider::TYPE::STAGE);
@@ -47,7 +46,6 @@ void Map::DrawMap(void)
 
 	MV1DrawModel(transform_.modelId);
 	MV1DrawModel(walltransform_.modelId);
-	//MV1DrawModel(whitewall_.modelId);
 			
 }
 
@@ -55,7 +53,6 @@ bool Map::Release(void)
 {
 	MV1DeleteModel(transform_.modelId);
 	MV1DeleteModel(walltransform_.modelId);
-	//MV1DeleteModel(whitewall_.modelId);
 		
 	return true;
 }
@@ -73,15 +70,11 @@ void Map::StoneWall(void)
 
 	walltransform_.scl = AsoUtility::VECTOR_ONE;
 	walltransform_.quaRot = Quaternion();
-	walltransform_.pos = { 0.0f, -100.0f, 0.0f };
-
-	// 当たり判定(コライダ)作成
-	//walltransform_.MakeCollider(Collider::TYPE::STAGE);
+	walltransform_.pos = { BASE_GROUND_POS_Y, STAGE_POS_Y, BASE_GROUND_POS_Y };
 
 	walltransform_.Update();
 
 	auto* player = objectManager_->GetPlayer();
-	//player->AddCollider(walltransform_.collider);
 
 }
 
@@ -94,7 +87,7 @@ void Map::WhiteWall(void)
 
 	whitewall_.scl = AsoUtility::VECTOR_ONE;
 	whitewall_.quaRot = Quaternion();
-	whitewall_.pos = { 0.0f, -100.0f, 0.0f };
+	whitewall_.pos = { BASE_GROUND_POS_Y, STAGE_POS_Y, BASE_GROUND_POS_Y };
 
 	// 当たり判定(コライダ)作成
 	whitewall_.MakeCollider(Collider::TYPE::WALL);

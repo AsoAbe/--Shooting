@@ -8,7 +8,33 @@ class Camera;
 class SceneManager
 {
 public:
+	// 無効な画像・スクリーンハンドル
+	static constexpr int INVALID_GRAPH_HANDLE = -1;
 
+	// 背景色
+	static constexpr int BACKGROUND_COLOR_R = 138;
+	static constexpr int BACKGROUND_COLOR_G = 190;
+	static constexpr int BACKGROUND_COLOR_B = 222;
+
+	// グローバルアンビエントライトの強さ
+	static constexpr float AMBIENT_LIGHT_R = 0.2f;
+	static constexpr float AMBIENT_LIGHT_G = 0.2f;
+	static constexpr float AMBIENT_LIGHT_B = 0.2f;
+	static constexpr float AMBIENT_LIGHT_A = 1.0f;
+
+	// ディレクショナルライトの方向
+	static constexpr float LIGHT_DIRECTION_X = 0.0f;
+	static constexpr float LIGHT_DIRECTION_Y = -1.0f;
+	static constexpr float LIGHT_DIRECTION_Z = 1.0f;
+
+	// フォグの色
+	static constexpr int FOG_COLOR_R = 110;
+	static constexpr int FOG_COLOR_G = 152;
+	static constexpr int FOG_COLOR_B = 178;
+
+	// フォグの開始・終了距離
+	static constexpr float FOG_START_DISTANCE = 8000.0f;
+	static constexpr float FOG_END_DISTANCE = 10000.0f;
 	//列挙型
 	//-----
 

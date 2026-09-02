@@ -16,6 +16,21 @@ namespace
 	/// ハイスコア初期値
 	/// </summary>
 	constexpr int START_HIGHSCORE = 500;
+
+	/// <summary>
+	/// スコアの初期値
+	/// </summary>
+	constexpr int START_SCORE = 0;
+
+	/// <summary>
+	/// クリア判定となる進行度
+	/// </summary>
+	constexpr float CLEAR_PROGRESSION = 1.0f;
+
+	/// <summary>
+	/// ライフが残っている判定値
+	/// </summary>
+	constexpr int LIFE_REMAINING = 0;
 }
 
 
@@ -71,7 +86,7 @@ bool ScoreManager::SetScore(int score)
 void ScoreManager::ClearScore()
 {
 	highScore_ = START_HIGHSCORE;
-	score_ = 0;
+	score_ = START_SCORE;
 }
 
 ScoreData ScoreManager::CalcScore(float targetProgression, const Player* player, float timerS)
@@ -92,7 +107,7 @@ ScoreData ScoreManager::CalcScore(float targetProgression, const Player* player,
 
 	ret.targetProgression = targetProgression;
 	ret.timeS = timerS;
-	if (targetProgression >= 1)
+	if (targetProgression >= CLEAR_PROGRESSION)
 	{
 		//クリアボーナス付与
 		ret.winScore = BONUS_CLEAR;
@@ -107,7 +122,7 @@ ScoreData ScoreManager::CalcScore(float targetProgression, const Player* player,
 	}
 	if (player != nullptr)
 	{
-		if (player->GetLife() > 0)
+		if (player->GetLife() > LIFE_REMAINING)
 		{
 			//ライフボーナス付与
 			ret.lifeScore = BONUS_LIFE;

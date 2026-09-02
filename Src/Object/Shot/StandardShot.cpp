@@ -11,8 +11,8 @@ StandardShot::StandardShot(SceneGame* parent, const ObjectModelData& model) : Sh
 void StandardShot::SetParam()
 {
 	isPlayerTag_ = false;
-	speed_ = 22;
-	colRadius_ = 80;
+	speed_ = STANDARD_SHOT_SPEED;
+	colRadius_ = DEFAULT_COL_RADIUS;
 	shotTimer_ = DEFAULT_SHOT_TIME;
 }
 

@@ -84,7 +84,6 @@ void Player::Draw()
 		return;
 	}
 	CharacterBase::Draw();
-	//DrawFormatString(0, 200, 0xff0000, "stamina = %f", stamina_);
 }
 
 void Player::Release()
@@ -278,7 +277,6 @@ void Player::Update_Move()
 	
 #pragma region MoveKey
 	//移動方向
-	//moveVec_ = {0,moveVec_.y,0};//yはそのまま
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
 	if (ins.IsNew(KEY_INPUT_UP))
@@ -299,7 +297,6 @@ void Player::Update_Move()
 	}
 	if (ins.IsTrgDown(KEY_INPUT_LSHIFT))
 	{
-		//sprintFlag_ = !sprintFlag_;
 	}
 	if (sceneGame_->IsJumpTutorial())
 	{
@@ -328,7 +325,6 @@ void Player::Update_Move()
 		//ｎ秒間だけ滑空を有効に
 		activeGlider_ = true;
 		//キー長押しで最高地点で自動滑空
-		//activeGlider_ = true;
 
 		autoGliderFlag_ = false;
 	}
@@ -340,7 +336,6 @@ void Player::Update_Move()
 		}
 		else
 		{
-			//activeGlider_ = false;
 			if ((transform_.pos.y - lastJumpPosY_ >= GLIDER_MIN_Y || jumpPow_.y < 0) && activeGlider_ == false)
 			{
 				//上昇を消す
@@ -382,9 +377,7 @@ void Player::Update_Move()
 		MATRIX mat = MGetIdent();
 
 		//平面移動の場合はXZを無視
-		//mat = MMult(mat, MGetRotY(angles_.x));
 		mat = MMult(mat, MGetRotY(cameraAngles.y));
-		//mat = MMult(mat, MGetRotY(angles_.z));
 
 		//カメラの回転を適用
 		VECTOR moveDir = VTransform(dir, mat);
@@ -392,7 +385,6 @@ void Player::Update_Move()
 		float moveAngle = atan2f(moveDir.x, moveDir.z);
 
 		//プレイヤー移動方向に回転を設定
-		//rot_ = { 0,angle,0 };
 
 		if (!(IsNew_Shot(ins)))
 		{
@@ -409,8 +401,6 @@ void Player::Update_Move()
 		//移動
 		moveVec_.x = moveDir.x* speed;
 		moveVec_.z = moveDir.z * speed;
-
-		//pos_ = VAdd(pos_, moveVec_);
 	}
 	else
 	{
@@ -437,7 +427,6 @@ void Player::Update_Move()
 		constexpr int DAMAGE_OUT = 1;
 		if (outCount_ == outWarningF)
 		{
-			//MessageManager::GetInstance().ShowNewMessage("警告演出開始", MessageManager::DEFAULT_MESSAGE_TIME);
 		}
 		if (outCount_ == outWarningF + outLimitF)
 		{
@@ -511,7 +500,6 @@ void Player::Update_Shot()
 				if (grazeBonusShot_ == GRAZE_BONUS_SHOT)
 				{
 					//最初の一発はエフェクトを生成
-					//sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::EXPLOSION_SHOT, GetColPos(), 0.8f);
 					sManager.PlaySE(SoundManager::SOUND_ID::SHOT_HIGH);
 				}
 				//ボーナスを消費
@@ -522,14 +510,6 @@ void Player::Update_Shot()
 			//生成
 			sceneGame_->GetOManager()->CreateShot(ObjectManager::ShotType::SHOT_PLAYER, GetColPos(),
 				Quaternion::AngleAxis(sceneManager_->GetCamera()->GetAngles().y,AsoUtility::AXIS_Y), 1);
-
-			////3way
-			//Quaternion lq = Quaternion::Mult(Quaternion::LookRotation(AsoUtility::DIR_F), Quaternion::AngleAxis(AsoUtility::Deg2RadF(-4), AsoUtility::AXIS_Y));
-			//Quaternion rq = Quaternion::Mult(Quaternion::LookRotation(AsoUtility::DIR_F), Quaternion::AngleAxis(AsoUtility::Deg2RadF(4), AsoUtility::AXIS_Y));
-			//VECTOR lpos = VAdd(GetColPos(), VScale(AsoUtility::DIR_L,10));
-			//VECTOR rpos = VAdd(GetColPos(), VScale(AsoUtility::DIR_R,10));
-			//sceneGame_->GetOManager()->CreateShot(ObjectManager::ShotType::SHOT_PLAYER, rpos, rq, 1);
-			//sceneGame_->GetOManager()->CreateShot(ObjectManager::ShotType::SHOT_PLAYER, lpos, lq, 1);
 		}
 	}
 }
@@ -623,7 +603,6 @@ ANIM Player::PlayAnim(ANIM curState, ANIM type, bool isLoop,
 {
 	ANIM ret = CharacterBase::PlayAnim(curState, type, isLoop, startStep, endStep, isStop, isForce);
 	animState_ = ret;
-	//curState == ANIM::MAXによって同じフレームで使用するPlayAnimにも影響を与える
 	if (curState == ANIM::MAX)
 	{
 		oldAnimState_ = animState_;

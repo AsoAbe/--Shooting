@@ -11,11 +11,11 @@
 
 ShotBase::ShotBase(SceneGame* parent, const ObjectModelData& modelData):ObjectBase(modelData)
 {
-	shotTimer_ = 0;
+	shotTimer_ = INITIAL_SHOT_TIMER;
 	isPlayerTag_ = false;
 	sceneGame_ = parent;
-	speed_ = 1;
-	colRadius_ = 1;
+	speed_ = INITIAL_SPEED;
+	colRadius_ = INITIAL_COL_RADIUS;
 	damage_ = DEFAULT_DAMAGE;
 	isActive_ = false;
 }
@@ -41,7 +41,7 @@ void ShotBase::Update()
 	Move();
 	if (shotTimer_ > 0)
 	{
-		shotTimer_ -= 1.0f/Application::FPS;
+		shotTimer_ -= UPDATE_TIME_SCALE /Application::FPS;
 	}
 	else
 	{
@@ -62,7 +62,6 @@ void ShotBase::Activation(VECTOR startPos, Quaternion quaRot, float size)
 	pos_ = startPos; 
 	quaRot_ = quaRot;
 	scale_ = VScale(AsoUtility::VECTOR_ONE,size);
-	//modelScale_ = 3;
 	//マトリクスでモデルを制御
 	SetMatrixModel();
 	//アクティブ化
@@ -73,11 +72,25 @@ void ShotBase::DrawCol()
 {
 	if (IsPlayerTag())
 	{
-		DrawSphere3D(pos_, GetColRadius(), 8, 0x0000FF, 0xFFFFFF, false);
+		DrawSphere3D(
+			pos_,
+			GetColRadius(),
+			COLLISION_SPHERE_SEGMENTS,
+			PLAYER_COLLISION_COLOR,
+			COLLISION_OUTLINE_COLOR,
+			false
+		);
 	}
 	else
 	{
-		DrawSphere3D(pos_, GetColRadius(), 8, 0xFF0000, 0xFFFFFF, false);
+		DrawSphere3D(
+			pos_,
+			GetColRadius(),
+			COLLISION_SPHERE_SEGMENTS,
+			ENEMY_COLLISION_COLOR,
+			COLLISION_OUTLINE_COLOR,
+			false
+		);
 	}
 }
 
@@ -90,13 +103,13 @@ void ShotBase::Move()
 void ShotBase::SetPosOnGround()
 {
 	//地形に沿う
-	constexpr float LINE_LENGTH = 500;
-	constexpr float POS_Y = 100;
-	float hitY = sceneGame_->GetOManager()->GetOnGroundY(GetPos(), LINE_LENGTH, LINE_LENGTH);
-	if (hitY > GetPos().y - LINE_LENGTH)
+	float hitY = sceneGame_->GetOManager()->GetOnGroundY(GetPos(), GROUND_LINE_LENGTH,
+		GROUND_LINE_LENGTH
+	);
+	if (hitY > GetPos().y - GROUND_LINE_LENGTH)
 	{
 		//地面が見つかったらyを地形に沿わせる
-		pos_.y = hitY + POS_Y;
+		pos_.y = hitY + GROUND_HEIGHT_OFFSET;
 	}
 }
 
@@ -128,7 +141,7 @@ void ShotBase::DeactivateShot()
 {
 	if (IsActive())
 	{
-		sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::EXPLOSION_Y , pos_, 0.5f);
+		sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::EXPLOSION_Y , pos_, DEACTIVATE_EFFECT_SCALE);
 		SetActive(false);
 	}
 }

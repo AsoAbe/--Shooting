@@ -11,8 +11,8 @@ TestShot::TestShot(SceneGame* parent, const ObjectModelData& model) : ShotBase(p
 void TestShot::SetParam()
 {
 	isPlayerTag_ = false;
-	speed_ = 12;
-	colRadius_ = 80;
+	speed_ = TEST_SHOT_SPEED;
+	colRadius_ = DEFAULT_COL_RADIUS;
 	shotTimer_ = DEFAULT_SHOT_TIME;
 }
 

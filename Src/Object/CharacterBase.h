@@ -31,6 +31,71 @@ public:
 		DOWN,
 		MAX			//要素の数
 	};
+	// 初期ステータス値
+	static constexpr int INITIAL_STATUS_VALUE = 0;
+
+	// 初期タイマー値
+	static constexpr int INITIAL_TIMER = 0;
+
+	// 無効なモデルハンドル
+	static constexpr int INVALID_MODEL_ID = -1;
+
+	// アニメーション開始フレーム
+	static constexpr float ANIMATION_START_STEP = 0.0f;
+
+	// アニメーション終了フレームを自動設定する値
+	static constexpr float ANIMATION_END_STEP_AUTO = -1.0f;
+
+	// デフォルトの回転速度倍率
+	static constexpr float DEFAULT_ROTATION_SPEED_RATE = 1.0f;
+
+	// 重力判定に使用する距離
+	static constexpr float GRAVITY_CHECK_LENGTH = 10.0f;
+
+	// 重力判定で上方向に確認する倍率
+	static constexpr float GRAVITY_CHECK_UP_RATE = 2.0f;
+
+	// 重力判定に使用する上方向の確認距離
+	static constexpr float GRAVITY_CHECK_DISTANCE = 25.0f;
+
+	// 接地時に地面から離す高さ
+	static constexpr float GROUND_OFFSET_Y = 2.0f;
+
+	// 通常のカプセル衝突回避試行回数
+	static constexpr int COLLISION_MAX_TRY = 10;
+
+	// 壁のカプセル衝突回避試行回数
+	static constexpr int WALL_COLLISION_MAX_TRY = 30;
+
+	// 衝突回避時に法線方向へ移動する距離
+	static constexpr float COLLISION_PUSH_DISTANCE = 1.0f;
+
+	// 傾斜判定の角度
+	static constexpr float SLOPE_CHECK_ANGLE = 120.0f;
+
+	// 傾斜による移動量の補正値
+	static constexpr float SLOPE_MOVE_DIVISOR = 3.0f;
+
+	// デバッグ表示するキャラクターの球体半径
+	static constexpr float DEBUG_SPHERE_RADIUS = 32.0f;
+
+	// デバッグ表示する球体の分割数
+	static constexpr int DEBUG_SPHERE_SEGMENTS = 8;
+
+	// 落下と判定するY座標
+	static constexpr float RESPAWN_LIMIT_Y = -9999.0f;
+
+	// リスポーン位置
+	static constexpr VECTOR RESPAWN_POSITION = { 0.0f, 999.0f, 0.0f };
+
+	// 回転角度の半周
+	static constexpr float HALF_ROTATION_DEG = 180.0f;
+
+	// 回転角度の一周
+	static constexpr float FULL_ROTATION_DEG = 360.0f;
+
+	// モデルの全フレームを対象にする指定
+	static constexpr int ALL_MODEL_FRAMES = -1;
 
 	static constexpr float GRAVITY = -9.8f / 60.0f*2.5f;
 	//滑空時の落下加速度。数値分重力に掛け算する
@@ -52,7 +117,7 @@ public:
 	//回転量(rad)
 	static constexpr float SPEED_ROT_RAD = SPEED_ROT * (DX_PI_F / 180.0f);
 
-	static constexpr float DEFAULT_COLLIDERSIZE=32;
+	static constexpr float DEFAULT_COLLIDERSIZE= 32;
 
 	static constexpr float DEFAULT_COLLIDER_POS_Y = 100;
 

@@ -1,5 +1,4 @@
 #pragma once
-
 #include<string>
 #include"../Common/Vector2.h"
 #include"../Common/AsoUtility.h"
@@ -10,8 +9,15 @@ class ObjectManager;
 class Map
 {
 public:
-	static constexpr float BASE_GROUND_POS_Y = 0;//基本的な地面の高さ
 
+	// 無効なモデルハンドル
+	static constexpr int INVALID_MODEL_ID = -1;
+
+	// ステージのY座標
+	static constexpr float STAGE_POS_Y = -100.0f;
+	
+	//基本的な地面の高さ
+	static constexpr float BASE_GROUND_POS_Y = 0.0f;
 
 	//コンストラクタ
 	Map(ObjectManager* parent);

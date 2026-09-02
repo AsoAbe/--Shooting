@@ -21,7 +21,7 @@
 
 ObjectManager::ObjectManager(void)
 {
-	shadowGraph_ = -1;
+	shadowGraph_ = INVALID_INDEX;
 	sceneGame_ = nullptr;
 	player_ = nullptr;
 	map_ = nullptr;
@@ -46,20 +46,12 @@ bool ObjectManager::Init(SceneGame* sceneGame)
 	CharacterBase* enemygolem = new EnemyGolem(sceneGame_, golemModel_);
 	enemygolem->Init();
 
-	/*CharacterBase* testC = new StandardBoss (sceneGame_, golemModel_);
-	testC->Init();*/
 	AddCharacter(enemygolem, {0,0,200});
-
-	//ObjectBase* testO = new TestObject(sceneGame_);
-	//testO->Init();
-	//AddObject(testO, { 200,0,200 });
 
 	map_ = new Map(this);
 	map_->Init();
 
-	//shotModelId_ = MV1LoadModel((Application::PATH_MODEL + "Coin.mv1").c_str());
-	//shotModelId_ = MV1LoadModel((Application::PATH_MODEL + "Crystal3.mv1").c_str());
-	//rockModelId_ = MV1LoadModel((Application::PATH_MODEL + "Golem/rock.mv1").c_str());
+	
 	shotModel_.modelFileName_ = ("御札/ofuda.mv1");
 	shotModel_.modelScale_ = 0.4f;
 	shotModel_.modelRot_ = VGet(AsoUtility::Deg2RadF(0), AsoUtility::Deg2RadF(0), AsoUtility::Deg2RadF(0));
@@ -75,11 +67,7 @@ bool ObjectManager::Init(SceneGame* sceneGame)
 
 void ObjectManager::Update(void)
 {
-	//if (map_ != nullptr)
-	//{
-	//	//必要なら関数を作成する
-	//	map_->Update();
-	//}
+	
 	for (ObjectBase* o : objects_)
 	{
 		o->Update();
@@ -108,10 +96,7 @@ void ObjectManager::Draw(void)
 	{
 		map_->DrawMap();
 	}
-	/*if (enemygolem_ != nullptr)
-	{
-		enemygolem_->Draw();
-	}*/
+	
 	for (ObjectBase* o : objects_)
 	{
 		o->Draw();
@@ -161,12 +146,7 @@ void ObjectManager::Release(void)
 		delete map_;
 		map_ = nullptr;
 	}
-	//if (enemygolem_ != nullptr)
-	//{
-	//	enemygolem_->Release();
-	//	delete enemygolem_;
-	//	enemygolem_ = nullptr;
-	//}
+	
 	if (player_ != nullptr)
 	{
 		player_->Release();
@@ -193,10 +173,6 @@ void ObjectManager::Release(void)
 	shotObj_.clear();
 
 	//ベースモデル解放
-	//DeleteGraph(shadowGraph_);
-	//shadowGraph_ = -1;
-	//MV1DeleteModel(shotModelId_);
-	//shotModelId_ = -1;
 
 	playerModel_.ReleaseModel();
 	testModel_.ReleaseModel();
@@ -279,7 +255,7 @@ void ObjectManager::AddCharacter(CharacterBase* c,VECTOR pos)
 }
 void ObjectManager::DestroyCharacter(CharacterBase* c)
 {
-	int target = -1;
+	int target = INVALID_INDEX;
 	for (int i = 0; i < characters_.size(); i++)
 	{
 		if (characters_[i] == c)
@@ -289,7 +265,7 @@ void ObjectManager::DestroyCharacter(CharacterBase* c)
 		}
 	}
 	//対象を見つけた
-	if (target != -1)
+	if (target != INVALID_INDEX)
 	{
 		characters_[target]->Release();
 		delete characters_[target];
@@ -314,7 +290,7 @@ void ObjectManager::AddObject(ObjectBase* o, VECTOR pos)
 
 void ObjectManager::DestroyObject(ObjectBase* o)
 {
-	int target = -1;
+	int target = INVALID_INDEX;
 	for (int i = 0; i < objects_.size(); i++)
 	{
 		if (objects_[i] == o)
@@ -324,7 +300,7 @@ void ObjectManager::DestroyObject(ObjectBase* o)
 		}
 	}
 	//対象を見つけた
-	if (target != -1)
+	if (target != INVALID_INDEX)
 	{
 		objects_[target]->Release();
 		delete objects_[target];
@@ -351,7 +327,7 @@ bool ObjectManager::ReplaceShotObj(ShotBase* o, VECTOR pos, Quaternion quaRot, f
 {
 	//探す
 	int index = FindNotActiveShot();
-	if (index == -1)
+	if (index == INVALID_INDEX)
 	{
 		return false;
 	}
@@ -374,7 +350,7 @@ int ObjectManager::FindNotActiveShot(const type_info& type)
 			return i;
 		}
 	}
-	return -1;
+	return INVALID_INDEX;
 }
 
 int ObjectManager::FindNotActiveShot()
@@ -387,18 +363,18 @@ int ObjectManager::FindNotActiveShot()
 			return i;
 		}
 	}
-	return -1;
+	return INVALID_INDEX;
 }
 
 void ObjectManager::CreateShot(ShotType type, VECTOR pos, Quaternion quaRot, float size)
 {
-	int target = -1;
+	int target = INVALID_INDEX;
 	ShotBase* ins = nullptr;
 	switch (type)
 	{
 	case ObjectManager::ShotType::TEST:
 		target = FindNotActiveShot(typeid(TestShot));
-		if (target == -1)
+		if (target == INVALID_INDEX)
 		{
 			ins = new TestShot(sceneGame_, rockModel_);
 			ins->Init();
@@ -407,7 +383,7 @@ void ObjectManager::CreateShot(ShotType type, VECTOR pos, Quaternion quaRot, flo
 
 	case ObjectManager::ShotType::SHOT_PLAYER:
 		target = FindNotActiveShot(typeid(PlayerShot));
-		if (target == -1)
+		if (target == INVALID_INDEX)
 		{
 			ins = new PlayerShot(sceneGame_, shotModel_);
 			ins->Init();
@@ -415,7 +391,7 @@ void ObjectManager::CreateShot(ShotType type, VECTOR pos, Quaternion quaRot, flo
 		break;
 	case ObjectManager::ShotType::SHOT_LOW:
 		target = FindNotActiveShot(typeid(LowDamageShot));
-		if (target == -1)
+		if (target == INVALID_INDEX)
 		{
 			ins = new LowDamageShot(sceneGame_, rockModel_);
 			ins->Init();
@@ -425,15 +401,14 @@ void ObjectManager::CreateShot(ShotType type, VECTOR pos, Quaternion quaRot, flo
 	case ObjectManager::ShotType::SHOT:
 	default:
 		target = FindNotActiveShot(typeid(StandardShot));
-		if (target == -1)
+		if (target == INVALID_INDEX)
 		{
 			ins = new StandardShot(sceneGame_, rockModel_);
 			ins->Init();
-			//MV1SetScale(rockModelId_, VGet(1.5f, 1.5f, 1.5f));
 		}
 		break;
 	}
-	if (target != -1)
+	if (target != INVALID_INDEX)
 	{
 		//再アクティブ化
 		ActivateShot(target, pos, quaRot, size);
@@ -477,112 +452,121 @@ void ObjectManager::DeactivateAllShot()
 
 void ObjectManager::DrawShadow(const VECTOR& pos,float radius)
 {
-	constexpr float LINE_LENGTH_DOWN = 1000;
-	constexpr float LINE_LENGTH_UP = 40;
-	constexpr int SHADOW_ALPHA = 114; //52
-	//三角形を表す
-	constexpr int POLYGON = 3;
-	//上に上げる
-	constexpr float SHADOW_Y = 4;
-	//地面判定の分割
-	constexpr int LOOP = 16;
-	//地面判定の1回あたりの角度
-	constexpr float LOOP_ANGLE = 360.0f / LOOP;
 	//影を映す地面の存在判定
 	bool isHit = false;
 	//足元座標を探す
-	float shadowY = -1 * LINE_LENGTH_DOWN;
+	float shadowY = NO_GROUND_Y * SHADOW_LINE_LENGTH_DOWN;
 
 	//posのyを地面に合わせる
 	VECTOR centerPos = pos;
-	centerPos.y = GetOnGroundY(pos, LINE_LENGTH_UP, LINE_LENGTH_DOWN);
-	isHit = centerPos.y > (pos.y- LINE_LENGTH_DOWN);
+	centerPos.y =
+		GetOnGroundY(pos, SHADOW_LINE_LENGTH_UP, SHADOW_LINE_LENGTH_DOWN);
+
+	isHit = centerPos.y > (pos.y - SHADOW_LINE_LENGTH_DOWN);
 	if(!(isHit))
 	{
 		//当たらなかった
 		return;
 	}
-	VERTEX3D vertex[1+ LOOP]{};
-	unsigned short index[LOOP* POLYGON]{};
+	VERTEX3D vertex[SHADOW_DIVISION_COUNT + 1]{};
+	unsigned short index[
+		SHADOW_DIVISION_COUNT * SHADOW_POLYGON_VERTEX_COUNT]{};
 	for (auto& v : vertex)
 	{
-		//v.pos = pos;
-		//v.u = 0;
-		//v.v = 0;
-		v.norm =VGet(0.0f, 0.0f, -1.0f);
-		v.dif = GetColorU8(255, 255, 255, SHADOW_ALPHA);
-		v.spc = GetColorU8(0, 0, 0, 0);
-		v.su = 0.0f;
-		v.sv = 0.0f;
+		
+		v.norm = VGet(
+			SHADOW_UV_ZERO,
+			SHADOW_UV_ZERO,
+			SHADOW_NORMAL_Z);
+
+		v.dif = GetColorU8(
+			255,
+			255,
+			255,
+			SHADOW_ALPHA);
+
+		v.spc = GetColorU8(
+			0,
+			0,
+			0,
+			SHADOW_SPECULAR_ALPHA);
+
+		v.su = SHADOW_UV_ZERO;
+		v.sv = SHADOW_UV_ZERO;
 	}
-	////01
-	////23
-	//vertex[0].pos = VAdd(pos, { -1 * radius ,0,radius });
-	//vertex[0].u = 0;
-	//vertex[0].v = 0;
-	//vertex[1].pos = VAdd(pos, { radius ,0,radius });
-	//vertex[1].u = 1;
-	//vertex[1].v = 0;
-	//vertex[2].pos = VAdd(pos, { -1 * radius ,0,-1*radius });
-	//vertex[2].u = 0;
-	//vertex[2].v = 1;
-	//vertex[3].pos = VAdd(pos, { radius ,0,-1*radius });
-	//vertex[3].u = 1;
-	//vertex[3].v = 1;
 	
 
 	vertex[0].pos = centerPos;
-	vertex[0].u = 0.5f;
-	vertex[0].v = 0.5f;
+	vertex[0].u = SHADOW_UV_CENTER;
+	vertex[0].v = SHADOW_UV_CENTER;
 	//丸影の外周の部分
 	float maxY = centerPos.y;
-	for (int i = 1; i < LOOP+1; i++)
+	for (int i = 1; i < SHADOW_DIVISION_COUNT + 1; i++)
 	{
-		float xSin = sinf(AsoUtility::Deg2RadF(LOOP_ANGLE * i));
-		float yCos = cosf(AsoUtility::Deg2RadF(LOOP_ANGLE * i));
-		VECTOR vPos = { pos.x+xSin * radius,
+		float xSin =
+			sinf(AsoUtility::Deg2RadF(SHADOW_DIVISION_ANGLE * i));
+
+		float yCos =
+			cosf(AsoUtility::Deg2RadF(SHADOW_DIVISION_ANGLE * i));
+
+		VECTOR vPos =
+		{
+			pos.x + xSin * radius,
 			0,
-			pos.z+yCos * radius };
-		vPos.y = GetOnGroundY(VGet(vPos.x, pos.y, vPos.z), LINE_LENGTH_UP, LINE_LENGTH_DOWN);
-		if (vPos.y > (pos.y - LINE_LENGTH_DOWN) && vPos.y> maxY)
+			pos.z + yCos * radius
+		};
+
+		vPos.y =
+			GetOnGroundY(
+				VGet(vPos.x, pos.y, vPos.z),
+				SHADOW_LINE_LENGTH_UP,
+				SHADOW_LINE_LENGTH_DOWN);
+
+		if (vPos.y > (pos.y - SHADOW_LINE_LENGTH_DOWN) &&
+			vPos.y > maxY)
 		{
 			//条件を満たしたらmaxYを更新する
 			maxY = vPos.y;
 		}
-		vertex[i].pos =vPos;
-		vertex[i].u = 0.5f+xSin*0.5f;
-		vertex[i].v = 0.5f+yCos * 0.5f;
+
+		vertex[i].pos = vPos;
+		vertex[i].u =
+			SHADOW_UV_CENTER + xSin * SHADOW_UV_HALF;
+		vertex[i].v =
+			SHADOW_UV_CENTER + yCos * SHADOW_UV_HALF;
 	}
 
+
 	//最終的なyを決定
-	vertex[0].pos.y += SHADOW_Y;
-	for (int i = 1; i < LOOP + 1; i++)
+	vertex[0].pos.y += SHADOW_Y_OFFSET;
+	for (int i = 1; i < SHADOW_DIVISION_COUNT + 1; i++)
 	{
 		//地形から外れた影をmaxYに合わせる
-		if (vertex[i].pos.y <= (pos.y - LINE_LENGTH_DOWN))
+		if (vertex[i].pos.y <=
+			(pos.y - SHADOW_LINE_LENGTH_DOWN))
 		{
 			vertex[i].pos.y = maxY;
 		}
-		vertex[i].pos.y += SHADOW_Y;
+
+		vertex[i].pos.y += SHADOW_Y_OFFSET;
+	}
+	
+	for (int i = 0; i < SHADOW_DIVISION_COUNT; i++)
+	{
+		index[i * SHADOW_POLYGON_VERTEX_COUNT] = 0;
+		index[i * SHADOW_POLYGON_VERTEX_COUNT + 1] = 1 + i;
+		index[i * SHADOW_POLYGON_VERTEX_COUNT + 2] =
+			1 + ((i + 1) % SHADOW_DIVISION_COUNT);
 	}
 
-	////ポリゴン設定
-	//index[0] = 0;
-	//index[1] = 1;
-	//index[2] = 2;
-	//index[3] = 1;
-	//index[4] = 3;
-	//index[5] = 2;
-	
-	for (int i = 0; i < LOOP; i++)
-	{
-		index[i * POLYGON] = 0;//中心点
-		index[i * POLYGON + 1] = 1 + i;
-		index[i * POLYGON + 2] = 1 + ((i + 1) % LOOP);
-	}
-	//DrawSphere3D(vertex[1].pos, 16, 8, 0xffffff, 0xffffff, false);
 	//描画
-	DrawPolygonIndexed3D(vertex, 1 + LOOP, index, LOOP, shadowGraph_, true);
+	DrawPolygonIndexed3D(
+		vertex,
+		SHADOW_DIVISION_COUNT + 1,
+		index,
+		SHADOW_DIVISION_COUNT,
+		shadowGraph_,
+		true);
 }
 
 float ObjectManager::GetOnGroundY(VECTOR pos, float lengthUp, float lengthDown) const
@@ -620,7 +604,6 @@ void ObjectManager::CreatePlayer()
 		return;
 	}
 	player_ = new Player(sceneGame_, playerModel_);
-	//player_ = new Player(sceneGame_, testModel_);
 	player_->Init();
 
 	SceneManager::GetInstance().GetCamera()->SetFollow(player_);
@@ -653,7 +636,7 @@ void ObjectManager::Collision()
 			{
 				if (player_->Damage(o->GetDamage()))
 				{
-					sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::EXPLOSION_Y,player_->GetColPos(), 0.8f);
+					sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::EXPLOSION_Y,player_->GetColPos(), HIT_EFFECT_SCALE);
 					o->SetActive(false);
 				}
 			}
@@ -673,7 +656,7 @@ void ObjectManager::Collision()
 			{
 				if (player_->Damage(DAMAGE_HIT))
 				{
-					sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::EXPLOSION_Y, player_->GetColPos(), 0.8f);
+					sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::EXPLOSION_Y, player_->GetColPos(), HIT_EFFECT_SCALE);
 				}
 			}
 			
@@ -694,7 +677,7 @@ void ObjectManager::Collision()
 			{
 				if (e->Damage(o->GetDamage()))
 				{
-					sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::EXPLOSION_Y, e->GetColPos(), 0.4f);
+					sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::EXPLOSION_Y, e->GetColPos(), ENEMY_HIT_EFFECT_SCALE);
 					o->SetActive(false);
 				}
 			}

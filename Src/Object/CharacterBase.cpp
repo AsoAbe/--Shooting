@@ -15,18 +15,15 @@
 #endif
 CharacterBase::CharacterBase(const CharacterModelData& modelData):modelData_(modelData)
 {
-	isActive_ = true;
-	hp_ = 0;
-	hpMax_ = 0;
-	stamina_ = 0;
-	staminamax = 0;
-	animationController_ = nullptr;
-	moveVec_ = AsoUtility::VECTOR_ZERO;
-	jumpPow_ = AsoUtility::VECTOR_ZERO;
-	notGroundedTimer_ = 0;
+	hp_ = INITIAL_STATUS_VALUE;
+	hpMax_ = INITIAL_STATUS_VALUE;
+	stamina_ = INITIAL_STATUS_VALUE;
+	staminamax = INITIAL_STATUS_VALUE;
 
-	colliderSize_ = 0;
-	colliderRadiusShot_ = 0;
+	notGroundedTimer_ = INITIAL_TIMER;
+
+	colliderSize_ = 0.0f;
+	colliderRadiusShot_ = 0.0f;
 
 	activeGlider_ = false;
 	preDamaged_ = false;
@@ -42,8 +39,6 @@ void CharacterBase::Init(void)
 {
 	//パラメータ設定
 	SetParam();
-
-	
 
 	//モデル
 	transform_.SetModel(MV1DuplicateModel(modelData_.model_));
@@ -93,14 +88,19 @@ void CharacterBase::Draw(void)
 	if (IsActive())
 	{
 
-		if (transform_.modelId != -1)
+		if (transform_.modelId != INVALID_MODEL_ID)
 		{
 			MV1DrawModel(transform_.modelId);
 		}
 		else
 		{
 #ifdef _DEBUG
-			DrawSphere3D(transform_.pos, 32, 8, 0xFF0000, 0xFFFFFF, true);
+			DrawSphere3D(transform_.pos,
+				DEBUG_SPHERE_RADIUS,
+				DEBUG_SPHERE_SEGMENTS,
+				0xFF0000,
+				0xFFFFFF,
+				true);
 #endif
 		}
 	}
@@ -222,7 +222,6 @@ bool CharacterBase::Damage(int damage)
 
 void CharacterBase::Died()
 {
-	//SetActive(false);
 }
 
 bool CharacterBase::IsActive() const
@@ -255,15 +254,13 @@ void CharacterBase::Move(VECTOR vec)
 
 	CalcGravityPow();
 
-
-
 	Collision();
 
 	// 移動
 	moveDiff_ = VSub(movedPos_, transform_.pos);
 	transform_.pos = movedPos_;
 
-	if (transform_.pos.y < -9999)
+	if (transform_.pos.y < RESPAWN_LIMIT_Y)
 	{
 		//落下でリスポーン
 		Respawn();
@@ -274,33 +271,13 @@ void CharacterBase::Respawn()
 {
 	moveVec_ = AsoUtility::VECTOR_ZERO;
 	jumpPow_ = AsoUtility::VECTOR_ZERO;
-	transform_.pos = { 0,999,0 };
+	transform_.pos = RESPAWN_POSITION;
 }
 
 void CharacterBase::Animation()
 {
 	animationController_->Update();
 }
-
-//void CharacterBase::SetRotation()
-//{
-//	// 回転を更新
-//	MATRIX mat = MGetIdent();
-//	mat = MMult(mat, MGetRotX(transform_.rot.x));
-//	mat = MMult(mat, MGetRotY(transform_.rot.y));
-//	mat = MMult(mat, MGetRotZ(transform_.rot.z));
-//	// 調整用の回転行列
-//	MATRIX localMat = MGetIdent();
-//	localMat = MMult(localMat, MGetRotX(rotLocal_.x));
-//	localMat = MMult(localMat, MGetRotY(rotLocal_.y));
-//	localMat = MMult(localMat, MGetRotZ(rotLocal_.z));
-//	// 行列の合成
-//	mat = MMult(mat, localMat);
-//
-//	//マトリクスで回転を適用
-//	MV1SetRotationMatrix(transform_.modelId, mat);
-//}
-
 
 ANIM CharacterBase::PlayAnim(ANIM curState,ANIM type, bool isLoop , float startStep, float endStep, bool isStop, bool isForce)
 {
@@ -314,7 +291,7 @@ ANIM CharacterBase::PlayAnim(ANIM curState,ANIM type, bool isLoop , float startS
 	{
 	case CharacterBase::ANIM::JUMP:
 		isLoop = false;
-		startStep = 0;
+		startStep = ANIMATION_START_STEP;
 		endStep = modelData_.GetGliderS();
 		isForce = true;
 		break;
@@ -327,7 +304,7 @@ ANIM CharacterBase::PlayAnim(ANIM curState,ANIM type, bool isLoop , float startS
 	case CharacterBase::ANIM::ONGROUND:
 		isLoop = false;
 		startStep = modelData_.GetOnGroundS();
-		endStep = -1;
+		endStep = ANIMATION_END_STEP_AUTO;
 		isForce = false;
 		break;
 	default:
@@ -361,10 +338,10 @@ bool CharacterBase::LazyRotation(float goalRot, float spd)
 	int aroundDir = AsoUtility::DirNearAroundDeg(degNowAngleY, degGoalAngleY);
 
 	float diff = AsoUtility::DegIn360(degGoalAngleY - degNowAngleY);
-	if (diff > 180)
+	if (diff > HALF_ROTATION_DEG)
 	{
 		//-180から180の範囲に入れる
-		diff -= 360;
+		diff -= FULL_ROTATION_DEG;;
 	}
 
 	if (fabsf(diff) > rotSpd)
@@ -403,10 +380,10 @@ void CharacterBase::CollisionGravity(void)
 	// 重力方向の反対
 	VECTOR dirUpGravity = AsoUtility::DIR_U;
 	// 重力の強さ
-	float gravityPow = 25.0f;
-	float checkPow = 10.0f;
+	float gravityPow = GRAVITY_CHECK_DISTANCE;;
+	float checkPow = GRAVITY_CHECK_LENGTH;
 	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
-	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
+	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * GRAVITY_CHECK_UP_RATE));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
 
 
@@ -417,19 +394,17 @@ void CharacterBase::CollisionGravity(void)
 		auto hit = MV1CollCheck_Line(
 			c.lock()->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
 		// 最初は上の行のように実装して、木の上に登ってしまうことを確認する
-		//if (hit.HitFlag > 0)
-		//if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
+	
 		if (hit.HitFlag > 0)
 		{
 			// 衝突地点から、少し上に移動
-			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
+			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, GROUND_OFFSET_Y));
 			// ジャンプリセット
 			jumpPow_ = AsoUtility::VECTOR_ZERO;
 			stepJump_ = 0.0f;
 			if (isJump_)
 			{
 				// 着地モーション
-				//PlayAnim(ANIM::MAX, ANIM::ONGROUND);
 			}
 			isJump_ = false;
 			//着地した場合isGrounded_をtrueに
@@ -462,7 +437,7 @@ void CharacterBase::CalcGravityPow(void)
 	// 重力方向
 	VECTOR dirGravity = AsoUtility::DIR_D;
 	// 重力の強さ
-	float gravityPow = GRAVITY * -1;
+	float gravityPow = -GRAVITY;
 	if (activeGlider_)
 	{
 		//滑空
@@ -483,12 +458,7 @@ void CharacterBase::CalcGravityPow(void)
 	}
 	
 	float dot = VDot(dirGravity, jumpPow_);
-	//if (dot >= 0.0f)
-	//{
-	//	// 重力方向と反対方向(マイナス)でなければ、ジャンプ力を無くす
-	//	jumpPow_ = gravity;
-	//}
-
+	
 }
 
 void CharacterBase::CalcSlope(void)
@@ -517,11 +487,11 @@ void CharacterBase::CalcSlope(void)
 	// 傾斜による移動
 	if (AsoUtility::SqrMagnitude(jumpPow_) == 0.0f)
 	{
-		float CHECK_ANGLE = 120.0f;
+		float CHECK_ANGLE = SLOPE_CHECK_ANGLE;
 		if (slopeAngleDeg_ >= CHECK_ANGLE)
 		{
 			float diff = abs(slopeAngleDeg_ - CHECK_ANGLE);
-			slopePow_ = VScale(slopeDir_, diff / 3.0f);
+			slopePow_ = VScale(slopeDir_, diff / SLOPE_MOVE_DIVISOR);
 			movePow_ = VAdd(movePow_, slopePow_);
 		}
 	}
@@ -547,11 +517,11 @@ void CharacterBase::CollisionCapsule(void)
 		for (int i = 0; i < hits.HitNum; i++)
 		{
 
-			int maxTry = 10;
+			int maxTry = COLLISION_MAX_TRY;
 			switch (c.lock()->type_)
 			{
 			case Collider::TYPE::WALL:
-				maxTry = 30;
+				maxTry = WALL_COLLISION_MAX_TRY;
 				break;
 			}
 
@@ -569,7 +539,7 @@ void CharacterBase::CollisionCapsule(void)
 				if (pHit)
 				{
 					// 法線の方向にちょっとだけ移動させる
-					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, 1.0f));
+					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, COLLISION_PUSH_DISTANCE));
 					// カプセルも一緒に移動させる
 					trans.pos = movedPos_;
 					trans.Update();
