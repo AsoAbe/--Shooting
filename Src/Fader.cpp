@@ -150,13 +150,13 @@ void Fader::SetFade(STATE state)
 	else if (state_ == STATE::FADE_OUT || state_ == STATE::FADEOUT_PS)
 	{
 		alpha_ = MIN_ALPHA;
-		faderIndex_ = GetRand(faderArray_.size() - 1);
+		faderIndex_ = GetRand(faderArray_.size() - FADER_INDEX_OFFSET);
 	}
 }
 
 Fader::PsStruct::PsStruct(const std::string& name)
 {
-	psMaterial = std::make_unique<PixelShaderMaterial>(name.c_str(), 1);
+	psMaterial = std::make_unique<PixelShaderMaterial>(name.c_str(), MATERIAL_TEXTURE_COUNT);
 	psRenderer = std::make_unique<PixelShaderRenderer>(*psMaterial);
 	psRenderer->MakeScreenSquereVertex();
 }

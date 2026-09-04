@@ -18,7 +18,7 @@ CharacterBase::CharacterBase(const CharacterModelData& modelData)
 	, animationController_(nullptr)
 {
 	sceneGame_ = nullptr;
-	isActive_ = false;
+	isActive_ = true;
 	idleAnim_ = 0;
 	walkAnim_ = 0;
 	runAnim_ = 0;

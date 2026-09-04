@@ -10,6 +10,21 @@ public:
 	static constexpr float NUM = static_cast<int>(LEN/TERM);//線の数
 	static constexpr float HNUM = NUM/2.0f;//線の数の半分
 
+	// グリッド描画
+	static constexpr int GRID_LINE_START = -1;
+	static constexpr int GRID_LINE_END = 1;
+	static constexpr int GRID_SPHERE_RADIUS = 8;
+	static constexpr int GRID_SPHERE_SEGMENTS = 8;
+
+	// グリッドの基準座標
+	static constexpr float GRID_ORIGIN = 0.0f;
+
+	// 描画色
+	static constexpr int GRID_X_AXIS_COLOR = 0xFF0000;
+	static constexpr int GRID_Y_AXIS_COLOR = 0x00FF00;
+	static constexpr int GRID_Z_AXIS_COLOR = 0x0000FF;
+	static constexpr int GRID_SPHERE_COLOR = 0x000000;
+
 	//関数
 
 	// コンストラクタ

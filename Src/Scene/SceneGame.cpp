@@ -97,7 +97,7 @@ bool SceneGame::Init(void)
 		ChangeVolumeSoundMem(SoundManager::GetInstance().GetBgmVolume(), bgm_);
 	}
 
-	timer_ = 0;
+	timer_ = INVALID_TIMER;
 
 	return true;
 }
@@ -152,13 +152,13 @@ void SceneGame::Update(void)
 		}
 		else
 		{
-			tutorialSkipTimer_ = 0;
+			tutorialSkipTimer_ = INVALID_TIMER;
 		}
 		int TUTORIALSKIP_F = static_cast<int>(Application::LONG_KEY_DOWN_TIME_S * Application::FPS);
 		if (tutorialSkipTimer_ >= TUTORIALSKIP_F || 
 			(ins.IsTrgDown(KEY_INPUT_R) && gameState_ == GAME_STATE::TUTORIAL_END))
 		{
-			tutorialSkipTimer_ = 0;
+			tutorialSkipTimer_ = INVALID_TIMER;
 			NextTutorial();
 			if (IsGrazeTutorial())
 			{

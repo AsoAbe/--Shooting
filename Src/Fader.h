@@ -25,6 +25,12 @@ public:
 	// フェーダー選択
 	static constexpr int RANDOM_INDEX_OFFSET = 1;
 
+	// ピクセルシェーダーマテリアルのテクスチャ数
+	static constexpr int MATERIAL_TEXTURE_COUNT = 1;
+
+	// フェーダー配列のインデックス調整値
+	static constexpr int FADER_INDEX_OFFSET = 1;
+
 	// フェードが進む速さ
 	static constexpr float SPEED_ALPHA = 5;
 

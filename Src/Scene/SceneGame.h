@@ -19,6 +19,7 @@ class SceneGame : public SceneBase
 public:
 	// 無効なスコア
 	static constexpr int INVALID_SCORE = -1;
+	static constexpr int INVALID_TIMER = 0;
 
 	// 進行度の初期値
 	static constexpr float INITIAL_PROGRESSION = 0.0f;

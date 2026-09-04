@@ -607,7 +607,7 @@ void Player::Update_Shot()
 			//ボーナスが有効
 			shotRate = SHOT_RATE_HIGH;
 		}
-		if (timer % shotRate == 0)
+		if (timer % shotRate == INITIAL_TIMER)
 		{
 			if (shotRate == SHOT_RATE_HIGH)
 			{
@@ -631,7 +631,7 @@ void Player::Update_Shot()
 void Player::Update_Count()
 {
 	//カウントダウン
-	if (recoveryTimer_ > 0)
+	if (recoveryTimer_ > INITIAL_TIMER)
 	{
 		recoveryTimer_--;
 	}
@@ -751,7 +751,7 @@ ANIM Player::PlayAnim(ANIM curState, ANIM type, bool isLoop,
 
 bool Player::IsRecoveryTime() const
 {
-	return recoveryTimer_ > 0;
+	return recoveryTimer_ > INITIAL_TIMER;
 }
 
 int Player::GetBonusShot() const
