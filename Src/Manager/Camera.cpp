@@ -16,6 +16,10 @@ Camera::Camera(void)
 	cameraShake_ = AsoUtility::VECTOR_ZERO;
 	oldMousePos_ = { 0, 0 };
 	targetCharacterPos_ = AsoUtility::VECTOR_ZERO;
+	mouseLock_ = false;
+	follow_ = nullptr;
+	targetPos_ = AsoUtility::VECTOR_ZERO;
+	mode_ = MODE::NONE;
 }
 
 Camera::~Camera(void)

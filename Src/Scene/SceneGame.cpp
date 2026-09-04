@@ -34,11 +34,11 @@ using SOUND_ID = SoundManager::SOUND_ID;
 //コンストラクタ
 SceneGame::SceneGame(void)
 {
-	mainGameScreen_ = -1;
-	explosionYEffect_ = -1;
-	chargingEffect_ = -1;
-	explosionShotEffect_ = -1;
-	smokeEffect_ = -1;
+	mainGameScreen_ = INVALID_SCORE;
+	explosionYEffect_ = INVALID_SCORE;
+	chargingEffect_ = INVALID_SCORE;
+	explosionShotEffect_ = INVALID_SCORE;
+	smokeEffect_ = INVALID_SCORE;
 	scorePanel_ = nullptr;
 	panel_ = nullptr;
 	grid_ = nullptr;
@@ -49,7 +49,7 @@ SceneGame::SceneGame(void)
 	mainPSMaterial_ = nullptr;
 	mainPSRenderer_ = nullptr;
 	
-	bgm_ = -1;
+	bgm_ = INVALID_SCORE;
 }
 
 SceneGame::~SceneGame(void)
@@ -94,7 +94,6 @@ bool SceneGame::Init(void)
 	{
 		bgm_ = LoadSoundMem((SceneManager::GetInstance().GetBgmChangType()).c_str());
 		PlaySoundMem(bgm_, DX_PLAYTYPE_LOOP);
-		//ChangeVolumeSoundMem(255 * 55 / 100, bgm_);
 		ChangeVolumeSoundMem(SoundManager::GetInstance().GetBgmVolume(), bgm_);
 	}
 
@@ -135,26 +134,7 @@ void SceneGame::Update(void)
 	//テスト用
 	if (ins.IsTrgDown(KEY_INPUT_LSHIFT))
 	{
-		//oManager_->GetPlayer()->Graze();
-		//testPlayingEffect_ = PlayEffekseer3DEffect(testEffect_);
 	}
-	//エフェクトの座標
-	//SetPosPlayingEffekseer3DEffect(testPlayingEffect_, 0, 20, 0);
-
-	//if (timer_ % (2) == 0)
-	//{
-	// //スタンダードショットの生成
-	//	oManager_->CreateShot(ObjectManager::ShotType::SHOT, { 0,100,400 },
-	//		Quaternion::Euler(0, AsoUtility::Deg2RadF(GetRand(360)), 0),
-	//		1);
-	//}
-	//if (timer_ % (Application::FPS / 4) == 0)
-	//{
-	//	//テストショットの生成
-	//	oManager_->CreateShot(ObjectManager::ShotType::TEST, { 0,100,400 },
-	//		Quaternion::Euler(0, AsoUtility::Deg2RadF(GetRand(360)), 0),
-	//		1);
-	//}
 
 	if (panel_ != nullptr)
 	{
@@ -291,14 +271,6 @@ int SceneGame::CreateEffect(EFFECT_TYPE eType, VECTOR pos, float scale)
 	return playingE;
 }
 
-//void SceneGame::CreateEffect(VECTOR pos,float scale)
-//{
-//	int playingE = PlayEffekseer3DEffect(explosionYEffect_);
-//	//エフェクトの座標
-//	SetPosPlayingEffekseer3DEffect(playingE, pos.x, pos.y+20, pos.z);
-//	SetScalePlayingEffekseer3DEffect(playingE, scale, scale, scale);
-//}
-
 int SceneGame::GetTimer(void)
 {
 	return timer_;
@@ -317,7 +289,6 @@ bool SceneGame::IsGameOver() const
 bool SceneGame::IsTutorial() const
 {
 	return false;
-	//return gameState_ == GAME_STATE::TUTORIAL_END || gameState_ == GAME_STATE::TUTORIAL_SHOT || gameState_ == GAME_STATE::TUTORIAL_JUMP;
 }
 
 bool SceneGame::IsGrazeTutorial() const
@@ -389,7 +360,7 @@ void SceneGame::GameOver()
 	else
 	{
 		//チュートリアル中はスコア無効
-		scoreData.resultScore = -1;
+		scoreData.resultScore = INVALID_SCORE;
 	}
 
 	gameState_ = GAME_STATE::GAMEOVER;
@@ -432,13 +403,13 @@ void SceneGame::GameClear()
 ScoreData SceneGame::CalcAndSetScore()
 {
 	CharacterBase* targetEnemy = oManager_->GetTargetCharacter();
-	float targetProgression = 0;
+	float targetProgression = INITIAL_PROGRESSION;
 	if (targetEnemy != nullptr)
 	{
 		if (targetEnemy->GetHp() <= 0)
 		{
 			//完全なので1.0fを返す。
-			targetProgression = 1;
+			targetProgression = CLEAR_PROGRESSION;
 		}
 		else
 		{
@@ -481,7 +452,6 @@ void SceneGame::BackToTitle()
 {
 	ScoreData scoreData;
 	scoreData.AddScore(ScoreManager::GetInstance().GetScore());
-	//scoreData.SaveScoreBoard();
 	SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::TITLE, true);
 }
 
@@ -520,8 +490,6 @@ void SceneGame::Draw_ScorePanel()
 	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, 0x202020, true);
 
 	scorePanel_->Draw();
-
-	//DrawString(Application::MAINGAME_SIZE_X + Application::MAINGAME_POS_X, 0, "TEXT", 0xffffff);
 }
 
 void SceneGame::NextTutorial()
@@ -541,10 +509,6 @@ void SceneGame::NextTutorial()
 		break;
 	case SceneGame::GAME_STATE::TUTORIAL_END:
 		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::GAME, true);
-		//player->ResetStatus();
-		//enemy->ResetStatus();
-		//timer_ = 0;
-		//gameState_ = GAME_STATE::GAME;
 		break;
 	default:
 		break;

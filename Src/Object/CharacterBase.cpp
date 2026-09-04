@@ -13,8 +13,38 @@
 #ifdef _DEBUG
 #define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
-CharacterBase::CharacterBase(const CharacterModelData& modelData):modelData_(modelData)
+CharacterBase::CharacterBase(const CharacterModelData& modelData)
+	:modelData_(modelData)
+	, animationController_(nullptr)
 {
+	sceneGame_ = nullptr;
+	isActive_ = false;
+	idleAnim_ = 0;
+	walkAnim_ = 0;
+	runAnim_ = 0;
+	animTotalTime_ = 0.0f;
+	stepAnim_ = 0.0f;
+	sceneManager_ = nullptr;
+	isGrounded_ = false;
+	damaged_ = false;
+	speed_ = 0.0f;
+	slopeAngleDeg_ = 0.0f;
+	isJump_ = false;
+	stepJump_ = 0.0f;
+
+	slopePow_ = AsoUtility::VECTOR_ZERO;
+	gravHitPosDown_ = AsoUtility::VECTOR_ZERO;
+	gravHitPosUp_ = AsoUtility::VECTOR_ZERO;
+	hitNormal_ = AsoUtility::VECTOR_ZERO;
+	hitPos_ = AsoUtility::VECTOR_ZERO;
+	jumpPow_ = AsoUtility::VECTOR_ZERO;
+	moveDiff_ = AsoUtility::VECTOR_ZERO;
+	moveDir_ = AsoUtility::VECTOR_ZERO;
+	movedPos_ = AsoUtility::VECTOR_ZERO;
+	movePow_ = AsoUtility::VECTOR_ZERO;
+	moveVec_ = AsoUtility::VECTOR_ZERO;
+	slopeDir_ = AsoUtility::VECTOR_ZERO;
+
 	hp_ = INITIAL_STATUS_VALUE;
 	hpMax_ = INITIAL_STATUS_VALUE;
 	stamina_ = INITIAL_STATUS_VALUE;
@@ -22,8 +52,8 @@ CharacterBase::CharacterBase(const CharacterModelData& modelData):modelData_(mod
 
 	notGroundedTimer_ = INITIAL_TIMER;
 
-	colliderSize_ = 0.0f;
-	colliderRadiusShot_ = 0.0f;
+	colliderSize_ = INITIAL_COLLIDER_SIZE;
+	colliderRadiusShot_ = INITIAL_COLLIDER_RADIUS_SHOT;
 
 	activeGlider_ = false;
 	preDamaged_ = false;
@@ -52,7 +82,7 @@ void CharacterBase::Init(void)
 	for (int i = 0; i < static_cast<int>(ANIM::MAX); i++)
 	{
 		ANIM anim = static_cast<ANIM>(i);
-		animationController_->Add(anim, modelData_.GetAnimMHandle(anim), modelData_.GetAnimSpeed(anim));
+		animationController_->Add(anim, modelData_.GetAnimMHandle(anim), static_cast<float>(modelData_.GetAnimSpeed(anim)));
 	}
 #pragma endregion
 	//IDLE‚Å“K—p
@@ -194,12 +224,12 @@ int CharacterBase::GetHpMax() const
 
 int CharacterBase::GetStamina() const
 {
-	return stamina_;
+	return static_cast<int>(stamina_);
 }
 
 int CharacterBase::GetStaminaMax() const
 {
-	return staminamax;
+	return static_cast<int>(staminamax);
 }
 
 bool CharacterBase::Damage(int damage)
@@ -292,19 +322,19 @@ ANIM CharacterBase::PlayAnim(ANIM curState,ANIM type, bool isLoop , float startS
 	case CharacterBase::ANIM::JUMP:
 		isLoop = false;
 		startStep = ANIMATION_START_STEP;
-		endStep = modelData_.GetGliderS();
+		endStep = static_cast<float>(modelData_.GetGliderS());
 		isForce = true;
 		break;
 	case CharacterBase::ANIM::FALLING:
 		isLoop = true;
-		startStep = modelData_.GetGliderS();
-		endStep = modelData_.GetGliderE();
+		startStep = static_cast<float>(modelData_.GetGliderS());
+		endStep = static_cast<float>(modelData_.GetGliderE());
 		isForce = false;
 		break;
 	case CharacterBase::ANIM::ONGROUND:
 		isLoop = false;
-		startStep = modelData_.GetOnGroundS();
-		endStep = ANIMATION_END_STEP_AUTO;
+		startStep = static_cast<float>(modelData_.GetOnGroundS());
+		endStep = static_cast<float>(ANIMATION_END_STEP_AUTO);
 		isForce = false;
 		break;
 	default:
@@ -317,7 +347,7 @@ ANIM CharacterBase::PlayAnim(ANIM curState,ANIM type, bool isLoop , float startS
 
 void CharacterBase::GliderEnd()
 {
-	animationController_->Play(ANIM::FALLING, false, modelData_.GetGliderE(), modelData_.GetOnGroundS(), false, false);
+	animationController_->Play(ANIM::FALLING, false, static_cast<float>(modelData_.GetGliderE()), static_cast<float>(modelData_.GetOnGroundS()), false, false);
 }
 
 bool CharacterBase::LazyRotation(float goalRot, float spd)

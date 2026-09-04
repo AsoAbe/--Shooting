@@ -17,6 +17,15 @@ struct ScoreData;
 class SceneGame : public SceneBase
 {
 public:
+	// 無効なスコア
+	static constexpr int INVALID_SCORE = -1;
+
+	// 進行度の初期値
+	static constexpr float INITIAL_PROGRESSION = 0.0f;
+
+	// クリア時の進行度
+	static constexpr float CLEAR_PROGRESSION = 1.0f;
+
 	//プレイヤーの基準座標
 	static constexpr  float PLAYER_START_Z = -2000;
 

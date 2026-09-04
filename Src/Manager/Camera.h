@@ -199,6 +199,3 @@ private:
 	void SetBeforeDrawLookDown();
 	void SetBeforeDrawFollowLookDown();
 };
-
-
-

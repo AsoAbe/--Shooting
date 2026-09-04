@@ -41,6 +41,106 @@ namespace
 	/// 射撃時のプレイヤー回転速度倍率
 	/// </summary>
 	constexpr float PLAYER_ROT_SPD_SHOT = 2;
+
+	/// <summary>
+	/// チュートリアル完了と判定する進行度
+	/// </summary>
+	constexpr float TUTORIAL_COMPLETE_PROGRESS = 1.0f;
+
+	/// <summary>
+	/// 残機がなくなる判定値
+	/// </summary>
+	constexpr int NO_LIFE = 0;
+
+	/// <summary>
+	/// プレイヤーの初期向き
+	/// </summary>
+	constexpr float PLAYER_INITIAL_ROTATION_DEG = 180.0f;
+
+	/// <summary>
+	/// 画面外カウントの初期値
+	/// </summary>
+	constexpr int OUT_COUNT_INITIAL = 0;
+
+	/// <summary>
+	/// 移動方向のX軸最小値
+	/// </summary>
+	constexpr float MOVE_DIRECTION_LEFT = -1.0f;
+
+	/// <summary>
+	/// 移動方向のX軸最大値
+	/// </summary>
+	constexpr float MOVE_DIRECTION_RIGHT = 1.0f;
+
+	/// <summary>
+	/// 移動方向のZ軸前方
+	/// </summary>
+	constexpr float MOVE_DIRECTION_FORWARD = 1.0f;
+
+	/// <summary>
+	/// 移動方向のZ軸後方
+	/// </summary>
+	constexpr float MOVE_DIRECTION_BACK = -1.0f;
+
+	/// <summary>
+	/// 掠り演出の角度
+	/// </summary>
+	constexpr float GRAZE_ANIMATION_ANGLE = DX_PI_F / 2.0f;
+
+	/// <summary>
+	/// 掠り演出の最大アルファ値
+	/// </summary>
+	constexpr int GRAZE_ALPHA_MAX = 255;
+
+	/// <summary>
+	/// 掠り演出ポリゴンの頂点数
+	/// </summary>
+	constexpr int GRAZE_VERTEX_COUNT = 4;
+
+	/// <summary>
+	/// 掠り演出ポリゴンのインデックス数
+	/// </summary>
+	constexpr int GRAZE_INDEX_COUNT = 6;
+
+	/// <summary>
+	/// 掠り演出のポリゴン数
+	/// </summary>
+	constexpr int GRAZE_POLYGON_COUNT = 2;
+
+	/// <summary>
+	/// テクスチャ座標の開始値
+	/// </summary>
+	constexpr float TEXTURE_COORD_MIN = 0.0f;
+
+	/// <summary>
+	/// テクスチャ座標の終了値
+	/// </summary>
+	constexpr float TEXTURE_COORD_MAX = 1.0f;
+
+	/// <summary>
+	/// 頂点法線のZ方向
+	/// </summary>
+	constexpr float GRAZE_NORMAL_Z = -1.0f;
+
+	/// <summary>
+	/// マテリアルのアウトライン幅
+	/// </summary>
+	constexpr float OUTLINE_WIDTH_NONE = 0.0f;
+
+	/// <summary>
+	/// マテリアル色の最小値
+	/// </summary>
+	constexpr float MATERIAL_COLOR_MIN = 0.0f;
+
+	/// <summary>
+	/// マテリアルのアルファ値最大値
+	/// </summary>
+	constexpr float MATERIAL_ALPHA_MAX = 1.0f;
+
+	/// <summary>
+/// 画面外ダメージ後に再判定を開始するための加算値
+/// </summary>
+	constexpr int OUT_COUNT_RESTART_OFFSET = 1;
 }
 
 Player::Player(SceneGame* parent, const CharacterModelData& modelData):CharacterBase(modelData)
@@ -52,19 +152,21 @@ Player::Player(SceneGame* parent, const CharacterModelData& modelData):Character
 	autoGliderFlag_ = false;
 	preIsGrounded_ = true;
 	isGrounded_ = true;
-	recoveryTimer_ = 0;
+	recoveryTimer_ = INITIAL_TIMER;
 	respawnPos_ = {};
 	prePos_ = {};
-	grazeAnimTimer_ = 0;
+	grazeAnimTimer_ = INITIAL_TIMER;
 	preGrazed_ = false;
-	lifeMax_ = 1;
+	lifeMax_ = INITIAL_LIFE;
 	life_ = lifeMax_;
-	grazeImg_ = -1;
-	grazeBonusShot_ = 0;
+	grazeImg_ = INVALID_GRAPH_HANDLE;
+	grazeBonusShot_ = INITIAL_TIMER;
 	lastJumpPosY_ = 0;
-	jumpCount_ = 0;
-	grazeCombo_ = 0;
-	grazeComboScore_ = 0;
+	jumpCount_ = INITIAL_TIMER;
+	grazeCombo_ = INITIAL_TIMER;
+	grazeComboScore_ = INITIAL_TIMER;
+	outCount_ = OUT_COUNT_INITIAL;
+	sprintFlag_ = false;
 	expireTime_ = std::chrono::steady_clock::now();
 }
 
@@ -88,10 +190,10 @@ void Player::Draw()
 
 void Player::Release()
 {
-	if (grazeImg_ != -1)
+	if (grazeImg_ != INVALID_GRAPH_HANDLE)
 	{
 		DeleteGraph(grazeImg_);
-		grazeImg_ = -1;
+		grazeImg_ = INVALID_GRAPH_HANDLE;
 	}
 	CharacterBase::Release();
 }
@@ -113,13 +215,13 @@ bool Player::Damage(int damage)
 	{
 		SoundManager& sManager = SoundManager::GetInstance();
 		//ボーナス消滅
-		grazeBonusShot_ = 0;
+		grazeBonusShot_ = INITIAL_TIMER;
 		//コンボを減少
 		grazeCombo_--;
 		//減少後にコンボを記録
 		RecordCombo();
 		//コンボをリセット
-		grazeCombo_ = 0;
+		grazeCombo_ = INITIAL_TIMER;
 		if ((sceneGame_->IsGrazeTutorial()&& sceneGame_->GetGrazeTutorialProgress() < 1.0f) || sceneGame_->IsJumpTutorial())
 		{
 			MessageManager::GetInstance().ShowNewMessage("MISS",MessageManager::DEFAULT_MESSAGE_TIME);
@@ -167,7 +269,7 @@ bool Player::Graze()
 	grazeAnimTimer_ = GRAZE_ANIM_TIME;
 	grazeBonusShot_ = GRAZE_BONUS_SHOT;
 	grazeCombo_++;
-	if (sceneGame_->IsGrazeTutorial() && sceneGame_->GetGrazeTutorialProgress() < 1.0f)
+	if (sceneGame_->IsGrazeTutorial() && sceneGame_->GetGrazeTutorialProgress() < TUTORIAL_COMPLETE_PROGRESS)
 	{
 		//チュートリアル効果音
 		MessageManager::GetInstance().ShowNewMessage("GOOD", MessageManager::DEFAULT_MESSAGE_TIME);
@@ -194,7 +296,7 @@ void Player::Died()
 	//残機消費
 	life_--;
 	//判定
-	if (GetLife() <= 0)
+	if (GetLife() <= NO_LIFE)
 	{
 		sceneGame_->GameOver();
 	}
@@ -223,10 +325,9 @@ void Player::Respawn_Player()
 		return;
 	}
 	//復活後無敵時間(秒)
-	constexpr float RECOVERY_TIME_S = 4.0f;
 	recoveryTimer_ = static_cast<int>(Application::FPS * RECOVERY_TIME_S);
 	//リセット
-	grazeBonusShot_ = 0;
+	grazeBonusShot_ = INITIAL_TIMER;
 	hp_ = hpMax_;
 	SetPos(respawnPos_);
 	sceneManager_->GetCamera()->ResetCameraPos();
@@ -240,31 +341,43 @@ float Player::GetGrazeRadius() const
 
 void Player::SetParam()
 {
-	if (grazeImg_ == -1)
+	if (grazeImg_ == INVALID_GRAPH_HANDLE)
 	{
 		grazeImg_ = LoadGraph((Application::PATH_IMAGE + "Circle.png").c_str());
 	}
-	hpMax_ = 8;
+
+	hpMax_ = PLAYER_MAX_HP;
 	hp_ = hpMax_;
-	//stamina = ;
-	lifeMax_ = 3;
+
+	lifeMax_ = PLAYER_MAX_LIFE;
 	life_ = lifeMax_;
+
 	stamina_ = MAX_STAMINA;
 	staminamax = MAX_STAMINA;
-	transform_.quaRotLocal = Quaternion::Euler({ 0, AsoUtility::DegToRadF(180), 0 });
-	respawnPos_ = { 0,0,SceneGame::PLAYER_START_Z };
+
+	transform_.quaRotLocal = Quaternion::Euler(
+		{ 0, AsoUtility::DegToRadF(PLAYER_INITIAL_ROTATION_DEG), 0 }
+	);
+
+	respawnPos_ = { 0, 0, SceneGame::PLAYER_START_Z };
 	transform_.pos = respawnPos_;
 	prePos_ = transform_.pos;
+
 	colliderSize_ = DEFAULT_COLLIDERSIZE;
-	colliderRadiusShot_ = 24;
+	colliderRadiusShot_ = SHOT_COLLIDER_RADIUS;
 
 	sprintFlag_ = true;
 
-	transform_.quaRotLocal = Quaternion::AngleAxis(AsoUtility::Deg2RadF(180), AsoUtility::AXIS_Y);
-	//コライダーを少し浮かせる
-	constexpr float COL_Y_ADD = 10;
-	capsule_->SetLocalPosDown({ 0,DEFAULT_COLLIDERSIZE + COL_Y_ADD,0 });
-	capsule_->SetLocalPosTop({ 0,HEAD_POS,0 });
+	transform_.quaRotLocal = Quaternion::AngleAxis(
+		AsoUtility::Deg2RadF(PLAYER_INITIAL_ROTATION_DEG),
+		AsoUtility::AXIS_Y
+	);
+
+	// コライダーを少し浮かせる
+	capsule_->SetLocalPosDown(
+		{ 0, DEFAULT_COLLIDERSIZE + COLLIDER_Y_ADD, 0 }
+	);
+	capsule_->SetLocalPosTop({ 0, HEAD_POS, 0 });
 	capsule_->SetRadius(DEFAULT_COLLIDERSIZE);
 }
 
@@ -281,28 +394,29 @@ void Player::Update_Move()
 
 	if (ins.IsNew(KEY_INPUT_UP))
 	{
-		dir = VAdd(dir, { 0,0,1 });
+		dir = VAdd(dir, { 0, 0, MOVE_DIRECTION_FORWARD });
 	}
 	if (ins.IsNew(KEY_INPUT_DOWN))
 	{
-		dir = VAdd(dir, { 0,0,-1 });
+		dir = VAdd(dir, { 0, 0, MOVE_DIRECTION_BACK });
 	}
 	if (ins.IsNew(KEY_INPUT_LEFT))
 	{
-		dir = VAdd(dir, { -1,0,0 });
+		dir = VAdd(dir, { MOVE_DIRECTION_LEFT, 0, 0 });
 	}
 	if (ins.IsNew(KEY_INPUT_RIGHT))
 	{
-		dir = VAdd(dir, { 1,0,0 });
+		dir = VAdd(dir, { MOVE_DIRECTION_RIGHT, 0, 0 });
 	}
 	if (ins.IsTrgDown(KEY_INPUT_LSHIFT))
 	{
 	}
+
 	if (sceneGame_->IsJumpTutorial())
 	{
 		//移動禁止中の場合無効化
-		dir.x = 0;
-		dir.z = 0;
+		dir.x = OUT_COUNT_INITIAL;
+		dir.z = OUT_COUNT_INITIAL;
 	}
 #pragma endregion
 #pragma region Jump
@@ -341,7 +455,7 @@ void Player::Update_Move()
 				//上昇を消す
 				if (jumpPow_.y > 0)
 				{
-					jumpPow_.y = 0;
+					jumpPow_.y = OUT_COUNT_INITIAL;
 				}
 				activeGlider_ = true;
 				autoGliderFlag_ = false;
@@ -404,8 +518,8 @@ void Player::Update_Move()
 	}
 	else
 	{
-		moveVec_.x = 0;
-		moveVec_.z = 0;
+		moveVec_.x = OUT_COUNT_INITIAL;
+		moveVec_.z = OUT_COUNT_INITIAL;
 		if (IsNew_Shot(ins))
 		{
 			//キー入力中は敵の方向(カメラ方向)を向く
@@ -417,13 +531,13 @@ void Player::Update_Move()
 	//画面外判定
 	if (isOut_ == false)
 	{
-		outCount_ = 0;
+		outCount_ = OUT_COUNT_INITIAL;
 	}
 	else
 	{
 		outCount_++;
-		float outWarningF = static_cast<int>(OUT_WARNING * Application::FPS);
-		float outLimitF = static_cast<int>(OUT_LIMIT * Application::FPS);
+		int outWarningF = static_cast<int>(OUT_WARNING * Application::FPS);
+		int outLimitF = static_cast<int>(OUT_LIMIT * Application::FPS);
 		constexpr int DAMAGE_OUT = 1;
 		if (outCount_ == outWarningF)
 		{
@@ -432,7 +546,7 @@ void Player::Update_Move()
 		{
 			MessageManager::GetInstance().ShowNewMessage("画面外ダメージ", MessageManager::DEFAULT_MESSAGE_TIME);
 			Damage(DAMAGE_OUT);
-			outCount_ = outWarningF+1;
+			outCount_ = outWarningF + OUT_COUNT_RESTART_OFFSET;
 		}
 	}
 
@@ -544,48 +658,73 @@ void Player::Update_Count()
 
 void Player::Draw_Graze()
 {
-	if (grazeAnimTimer_ <= 0)
+	if (grazeAnimTimer_ <= OUT_COUNT_INITIAL)
 	{
 		//描画なし
 		return;
 	}
 	float rate = static_cast<float>(grazeAnimTimer_) / GRAZE_ANIM_TIME;
 	//三角関数でアニメーション
-	rate = sinf((DX_PI_F /2) * rate);
-	if (rate < 0)
+	rate = sinf(GRAZE_ANIMATION_ANGLE * rate);
+	if (rate < OUT_COUNT_INITIAL)
 	{
 		//描画なし
 		return;
 	}
 	//ポリゴン設定
 	VECTOR circlePos = GetColPos();
-	VERTEX3D vertex[4]{};
-	unsigned short index[6]{};
+	VERTEX3D vertex[GRAZE_VERTEX_COUNT]{};
+	unsigned short index[GRAZE_INDEX_COUNT]{};
 	for (auto& v : vertex)
 	{
 		v.pos = circlePos;
-		v.u = 0;
-		v.v = 0;
-		v.norm = VGet(0.0f, 0.0f, -1.0f);
-		v.dif = GetColorU8(255, 255, 255, static_cast<int>(255* rate));
-		v.spc = GetColorU8(0, 0, 0, 0);
-		v.su = 0.0f;
-		v.sv = 0.0f;
+		v.u = TEXTURE_COORD_MIN;
+		v.v = TEXTURE_COORD_MIN;
+		v.norm = VGet(0.0f, 0.0f, GRAZE_NORMAL_Z);
+		v.dif = GetColorU8(
+			GRAZE_ALPHA_MAX,
+			GRAZE_ALPHA_MAX,
+			GRAZE_ALPHA_MAX,
+			static_cast<int>(GRAZE_ALPHA_MAX * rate)
+		);
+		v.spc = GetColorU8(
+			OUT_COUNT_INITIAL,
+			OUT_COUNT_INITIAL,
+			OUT_COUNT_INITIAL,
+			OUT_COUNT_INITIAL
+		);
+		v.su = TEXTURE_COORD_MIN;
+		v.sv = TEXTURE_COORD_MIN;
 	}
 	//01
 	//23
-	vertex[0].pos = VAdd(circlePos, { -1 * GRAZE_RADIUS ,0,GRAZE_RADIUS });
-	vertex[0].u = 0;
-	vertex[0].v = 0;
-	vertex[1].pos = VAdd(circlePos, { GRAZE_RADIUS ,0,GRAZE_RADIUS });
-	vertex[1].u = 1;
-	vertex[1].v = 0;
-	vertex[2].pos = VAdd(circlePos, { -1 * GRAZE_RADIUS ,0,-1 * GRAZE_RADIUS });
-	vertex[2].u = 0;
-	vertex[2].v = 1;
-	vertex[3].pos = VAdd(circlePos, { GRAZE_RADIUS ,0,-1 * GRAZE_RADIUS });
-	vertex[3].u = 1;
-	vertex[3].v = 1;
+	vertex[0].pos = VAdd(
+		circlePos,
+		{ -1 * GRAZE_RADIUS, 0, GRAZE_RADIUS }
+	);
+	vertex[0].u = TEXTURE_COORD_MIN;
+	vertex[0].v = TEXTURE_COORD_MIN;
+
+	vertex[1].pos = VAdd(
+		circlePos,
+		{ GRAZE_RADIUS, 0, GRAZE_RADIUS }
+	);
+	vertex[1].u = TEXTURE_COORD_MAX;
+	vertex[1].v = TEXTURE_COORD_MIN;
+
+	vertex[2].pos = VAdd(
+		circlePos,
+		{ -1 * GRAZE_RADIUS, 0, -1 * GRAZE_RADIUS }
+	);
+	vertex[2].u = TEXTURE_COORD_MIN;
+	vertex[2].v = TEXTURE_COORD_MAX;
+
+	vertex[3].pos = VAdd(
+		circlePos,
+		{ GRAZE_RADIUS, 0, -1 * GRAZE_RADIUS }
+	);
+	vertex[3].u = TEXTURE_COORD_MAX;
+	vertex[3].v = TEXTURE_COORD_MAX;
 
 	//ポリゴン設定
 	index[0] = 0;
@@ -595,7 +734,7 @@ void Player::Draw_Graze()
 	index[4] = 3;
 	index[5] = 2;
 	//描画
-	DrawPolygonIndexed3D(vertex, 4, index, 2, grazeImg_, true);
+	DrawPolygonIndexed3D(vertex, GRAZE_VERTEX_COUNT, index, GRAZE_POLYGON_COUNT, grazeImg_, true);
 }
 
 ANIM Player::PlayAnim(ANIM curState, ANIM type, bool isLoop,
@@ -652,11 +791,34 @@ int Player::GetGrazeCombo() const
 void Player::SetMaterialSetting()
 {
 	int MaterialNum = MV1GetMaterialNum(transform_.modelId);
-	for (int i = 0; i < MaterialNum; i++) {
-		float DotWidth = MV1GetMaterialOutLineDotWidth(transform_.modelId, i);
-		MV1SetMaterialOutLineWidth(transform_.modelId, i, 0.0f);
-		MV1SetMaterialOutLineDotWidth(transform_.modelId, i, 0.0f);
-		MV1SetMaterialOutLineColor(transform_.modelId, i, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
+
+	for (int i = 0; i < MaterialNum; i++)
+	{
+		float DotWidth =
+			MV1GetMaterialOutLineDotWidth(transform_.modelId, i);
+
+		MV1SetMaterialOutLineWidth(
+			transform_.modelId,
+			i,
+			OUTLINE_WIDTH_NONE
+		);
+
+		MV1SetMaterialOutLineDotWidth(
+			transform_.modelId,
+			i,
+			OUTLINE_WIDTH_NONE
+		);
+
+		MV1SetMaterialOutLineColor(
+			transform_.modelId,
+			i,
+			GetColorF(
+				MATERIAL_COLOR_MIN,
+				MATERIAL_COLOR_MIN,
+				MATERIAL_COLOR_MIN,
+				MATERIAL_ALPHA_MAX
+			)
+		);
 	}
 }
 
@@ -678,9 +840,9 @@ void Player::RecordCombo()
 bool Player::StaminaCount(void)
 {
 	stamina_--;
-	if(stamina_ < 0)
+	if(stamina_ < OUT_COUNT_INITIAL)
 	{ 
-		stamina_ = 0;
+		stamina_ = OUT_COUNT_INITIAL;
 		activeGlider_ = false;
 	}
 

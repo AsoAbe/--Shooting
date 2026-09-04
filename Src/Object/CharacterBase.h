@@ -92,7 +92,7 @@ public:
 	static constexpr float HALF_ROTATION_DEG = 180.0f;
 
 	// 回転角度の一周
-	static constexpr float FULL_ROTATION_DEG = 360.0f;
+	static constexpr int FULL_ROTATION_DEG = 360;
 
 	// モデルの全フレームを対象にする指定
 	static constexpr int ALL_MODEL_FRAMES = -1;
@@ -120,6 +120,12 @@ public:
 	static constexpr float DEFAULT_COLLIDERSIZE= 32;
 
 	static constexpr float DEFAULT_COLLIDER_POS_Y = 100;
+
+	// コライダーサイズの初期値
+	static constexpr float INITIAL_COLLIDER_SIZE = 0.0f;
+
+	// 弾コライダー半径の初期値
+	static constexpr float INITIAL_COLLIDER_RADIUS_SHOT = 0.0f;
 
 	CharacterBase(const CharacterModelData& modelData);
 	virtual ~CharacterBase(void);
@@ -303,9 +309,6 @@ protected:
 	// ジャンプの入力受付時間
 	float stepJump_;
 
- ///-----------------------------
-
-
 	// パラメータ設定(純粋仮想関数。派生クラスで必ず初期設定を実装して貰うように)
 	virtual void SetParam(void) = 0;
 
@@ -366,7 +369,6 @@ protected:
 	void CollisionCapsule(void);
 
 	std::unique_ptr<Capsule> capsule_;
-	//void CollisionCapsule(void);
 
 	void virtual SetMaterialSetting();
 

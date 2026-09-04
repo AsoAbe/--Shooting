@@ -61,6 +61,115 @@ namespace
 	/// 移動を折り返すx(中心を0とした絶対値)
 	/// </summary>
 	constexpr float MOVE_X_END = 800;
+	/// <summary>
+/// 無効なエフェクトハンドル
+/// </summary>
+	constexpr int INVALID_EFFECT_HANDLE = -1;
+
+	/// <summary>
+	/// ダッシュ開始時の回数
+	/// </summary>
+	constexpr int DASH_COUNT_START = 0;
+
+	/// <summary>
+	/// ダッシュ開始時の最大回数
+	/// </summary>
+	constexpr int DASH_COUNT_MAX = 2;
+
+	/// <summary>
+	/// 移動速度
+	/// </summary>
+	constexpr float MOVING_SHOT_SPEED = 4.0f;
+
+	/// <summary>
+	/// 移動方向を反転する倍率
+	/// </summary>
+	constexpr float MOVE_DIRECTION_REVERSE = -1.0f;
+
+	/// <summary>
+	/// ランダム攻撃の弾生成間隔
+	/// </summary>
+	constexpr int RANDOM_SHOT_INTERVAL = 2;
+
+	/// <summary>
+	/// 周囲攻撃の発射間隔
+	/// </summary>
+	constexpr int AROUND_TIME = 45;
+
+	/// <summary>
+	/// 周囲攻撃の発射数
+	/// </summary>
+	constexpr int AROUND_LOOP = 18;
+
+	/// <summary>
+	/// 周囲攻撃の1回あたりの角度
+	/// </summary>
+	constexpr float AROUND_ADD = 6.0f;
+
+	/// <summary>
+	/// 角度1周分
+	/// </summary>
+	constexpr float FULL_ROTATION_DEG = 360.0f;
+
+	/// <summary>
+	/// チャージ演出の最大割合
+	/// </summary>
+	constexpr float CHARGE_ANIMATION_MAX_RATE = 0.5f;
+
+	/// <summary>
+	/// 低HP判定の割合
+	/// </summary>
+	constexpr float LOW_HP_RATE = 0.5f;
+
+	/// <summary>
+	/// ダッシュ終了後の戻り位置のランダム範囲を半分にする値
+	/// </summary>
+	constexpr int DASH_RETURN_RANDOM_DIVISOR = 2;
+
+	/// <summary>
+	/// ダッシュ攻撃のランダム分岐数
+	/// </summary>
+	constexpr int DASH_RANDOM_COUNT = 3;
+
+	/// <summary>
+	/// ランダム攻撃の先頭判定値
+	/// </summary>
+	constexpr int RANDOM_ATTACK_INDEX = 0;
+
+	/// <summary>
+	/// 攻撃ステート切り替え判定の余り
+	/// </summary>
+	constexpr int STATE_CHANGE_REMAINDER = 0;
+
+	/// <summary>
+	/// 初期回転角度
+	/// </summary>
+	constexpr float BOSS_INITIAL_ROTATION_DEG = 180.0f;
+
+	/// <summary>
+	/// ボスの弾コライダー半径
+	/// </summary>
+	constexpr float BOSS_SHOT_COLLIDER_RADIUS = 24.0f;
+
+	/// <summary>
+	/// ボスの最大HP
+	/// </summary>
+	constexpr int BOSS_MAX_HP = 200;
+
+	/// <summary>
+	/// エフェクト生成時の倍率
+	/// </summary>
+	constexpr float CHARGE_EFFECT_SCALE = 1.0f;
+
+	/// <summary>
+	/// 弾生成時のサイズ倍率
+	/// </summary>
+	constexpr float SHOT_SIZE_SCALE = 1.0f;
+
+	/// <summary>
+	/// 90度を表すラジアン値
+	/// </summary>
+	constexpr float RIGHT_ANGLE_RAD = DX_PI_F * 0.5f;
 
 }
 
@@ -75,23 +184,23 @@ StandardBoss::StandardBoss(SceneGame* parent, const CharacterModelData& modelDat
 	moveState_ = MOVE_STATE::R;
 	stateChangeCount_ = 0;
 	lastCount_ = 0;
-	dashVec_ = {0,0,1};
-	dashCountEnd_ = 0;
-	dashCount_ = 0;
+	dashVec_ = { 0, 0, 1 };
+	dashCountEnd_ = DASH_COUNT_START;
+	dashCount_ = DASH_COUNT_START;
 	dashChangeVecFlag_ = false;
 	lastPos_ = {};
 	returnPos_ = {};
-	chargeEffect_ = -1;
+	chargeEffect_ = INVALID_EFFECT_HANDLE;
 	died_ = false;
 	lowHpAttackFlag_ = true;
 }
+
 StandardBoss::~StandardBoss(void)
 {
 }
 
 void StandardBoss::ChangeState(ATTACK_STATE state)
 {
-	constexpr int DASH_NUM = 2;
 	constexpr int STATE_CHANGE_TIME_STANDARD = 3;
 	constexpr int STATE_CHANGE_TIME_LONG = 8;
 	state_ = state;
@@ -110,8 +219,8 @@ void StandardBoss::ChangeState(ATTACK_STATE state)
 		ChangeState_PowerCharging(diff);
 		break;
 	case StandardBoss::ATTACK_STATE::DASH:
-		dashCountEnd_ = DASH_NUM;
-		dashCount_ = 0;//プレイヤー座標を越えたら1として扱う。その後は方向転換の度に+1
+		dashCountEnd_ = DASH_COUNT_MAX;
+		dashCount_ = DASH_COUNT_START;//プレイヤー座標を越えたら1として扱う。その後は方向転換の度に+1
 		dashChangeVecFlag_ = true;
 		//ダッシュ効果音
 		SoundManager::GetInstance().PlaySE(SoundManager::SOUND_ID::ENEMY_DASH);
@@ -163,7 +272,6 @@ void StandardBoss::Died()
 		return;
 	}
 	died_ = true;
-	//SetActive(false);
 }
 
 VECTOR StandardBoss::GetLocalDiff(void)
@@ -198,8 +306,8 @@ void StandardBoss::SetParam()
 {
 	transform_.quaRotLocal = Quaternion::Euler({ 0, AsoUtility::DegToRadF(180), 0 });
 	colliderSize_ = DEFAULT_COLLIDERSIZE;
-	colliderRadiusShot_ = 24;
-	hpMax_ = 200;
+	colliderRadiusShot_ = BOSS_SHOT_COLLIDER_RADIUS;
+	hpMax_ = BOSS_MAX_HP;
 	hp_ = hpMax_;
 }
 
@@ -207,10 +315,10 @@ void StandardBoss::Update_Move()
 {
 	if(IsMovingShot())
 	{
-		moveVec_.x = 4;
+		moveVec_.x = MOVING_SHOT_SPEED;
 		if (moveState_ != MOVE_STATE::R)
 		{
-			moveVec_.x *= -1;
+			moveVec_.x *= MOVE_DIRECTION_REVERSE;
 		}
 
 		transform_.pos = VAdd(transform_.pos, moveVec_);
@@ -220,7 +328,7 @@ void StandardBoss::Update_Move()
 			moveState_ = MOVE_STATE::L;
 			NextState();
 		}
-		else if(transform_.pos.x <-1*MOVE_X_END)
+		else if(transform_.pos.x < MOVE_DIRECTION_REVERSE *MOVE_X_END)
 		{
 			moveState_ = MOVE_STATE::R;
 			NextState();
@@ -251,21 +359,20 @@ void StandardBoss::Update_Shot()
 			//ランダム攻撃の場合は続けて突進行動
 			ChangeState(ATTACK_STATE::DASH);
 			StopEffekseer3DEffect(chargeEffect_);
-			chargeEffect_ = -1;
+			chargeEffect_ = INVALID_EFFECT_HANDLE;
 		}
 	}
-	constexpr int AROUND_TIME = 45;
-	constexpr int AROUND_LOOP = 18;
+
 	switch (state_)
 	{
 	case StandardBoss::ATTACK_STATE::RANDOM_MOVING:
 	case StandardBoss::ATTACK_STATE::RANDOM:
-		if (shotCount % (2) == 0)
+		if (shotCount % RANDOM_SHOT_INTERVAL == 0)
 		{
 			//ショットの生成
 			sceneGame_->GetOManager()->CreateShot(ObjectManager::ShotType::SHOT_LOW, GetColPos(),
-				Quaternion::Euler(0, AsoUtility::Deg2RadF(GetRand(360)), 0),
-				1);
+				Quaternion::Euler(0, AsoUtility::Deg2RadF(GetRand(FULL_ROTATION_DEG)), 0),
+				SHOT_SIZE_SCALE);
 		}
 		break;
 	case ATTACK_STATE::AROUND_MOVING:
@@ -273,7 +380,6 @@ void StandardBoss::Update_Shot()
 		if (shotCount % (AROUND_TIME) == 0)
 		{
 			//1つ進むごとに加算される角度(deg)
-			static constexpr float AROUND_ADD = 6;
 			float addRad = 0 ;
 			if (IsMovingShot() == false)
 			{
@@ -308,13 +414,13 @@ void StandardBoss::AttackUpdate_PowerCharging()
 	}
 	if (counter_ - lastCount_ <= DASH_START_WAIT_F+ DASH_START_ANIM_F)
 	{
-		float dashAnim = sinf((static_cast<float>((counter_ - lastCount_)- DASH_START_WAIT_F) / DASH_START_ANIM_F) * (DX_PI_F * 0.5f));
+		float dashAnim = sinf((static_cast<float>((counter_ - lastCount_)- DASH_START_WAIT_F) / DASH_START_ANIM_F) * RIGHT_ANGLE_RAD);
 		transform_.pos = VAdd(lastPos_,VScale(moveVec_, dashAnim));
 	}
 	if ((counter_ - lastCount_) >= DASH_START_TOTAL_F -SceneGame::CHARGE_EFFECT_F)
 	{
 		VECTOR colPos = GetColPos();
-		if (chargeEffect_ == -1)
+		if (chargeEffect_ == INVALID_EFFECT_HANDLE)
 		{
 			chargeEffect_ =CreateChargeEffect();
 		}
@@ -326,7 +432,7 @@ void StandardBoss::AttackUpdate_PowerCharging()
 	if (counter_ - lastCount_ >= DASH_START_TOTAL_F)
 	{
 		//待機が終わったら攻撃開始
-		int rand = GetRand(3-1);
+		int rand = GetRand(DASH_RANDOM_COUNT -1);
 		if (IsLowHp() && (lowHpAttackFlag_ || rand == 0))
 		{
 			lowHpAttackFlag_ =false;
@@ -337,13 +443,15 @@ void StandardBoss::AttackUpdate_PowerCharging()
 			ChangeState(ATTACK_STATE::DASH);
 		}
 		StopEffekseer3DEffect(chargeEffect_);
-		chargeEffect_ = -1;
+		chargeEffect_ = INVALID_EFFECT_HANDLE;
 	}
 }
 
 void StandardBoss::AttackUpdate_Dash()
 {
-	constexpr int DASH_TIME_LONG_F = DASH_TIME_F *3;
+	constexpr int DASH_TIME_LONG_RATE = 3;
+
+	constexpr int DASH_TIME_LONG_F = DASH_TIME_F * DASH_TIME_LONG_RATE;
 	counter_++;
 	if (counter_- lastCount_ <= DASH_WAIT_F && !(dashCount_ <= 1))
 	{
@@ -401,11 +509,13 @@ void StandardBoss::AttackUpdate_Dash()
 
 void StandardBoss::AttackUpdate_Return()
 {
+	constexpr int RETURN_ANIMATION_DURATION_RATE = 2;
+
 	counter_++;
 	if (counter_ - lastCount_>= DASH_START_ANIM_F)
 	{
 		transform_.pos = returnPos_;
-		if (counter_ - lastCount_ >= DASH_START_ANIM_F * 2)
+		if (counter_ - lastCount_ >= DASH_START_ANIM_F * RETURN_ANIMATION_DURATION_RATE)
 		{
 			if (sceneGame_->IsJumpTutorial())
 			{
@@ -423,7 +533,7 @@ void StandardBoss::AttackUpdate_Return()
 
 int StandardBoss::CreateChargeEffect()
 {
-	int ret = sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::CHARGE, GetColPos(), 1.0f);
+	int ret = sceneGame_->CreateEffect(SceneGame::EFFECT_TYPE::CHARGE, GetColPos(), CHARGE_EFFECT_SCALE);
 	SoundManager::GetInstance().PlaySE(SoundManager::SOUND_ID::CHARGE);
 	return ret;
 }
@@ -444,12 +554,11 @@ void StandardBoss::ChangeState_PowerCharging(const VECTOR& diff)
 }
 void StandardBoss::ChangeState_Return()
 {
-	float randomX = GetRand(DASH_RETURN_RANDOM) - (DASH_RETURN_RANDOM / 2);
-	float randomZ = GetRand(DASH_RETURN_RANDOM) - (DASH_RETURN_RANDOM / 2);
+	float randomX = GetRand(DASH_RETURN_RANDOM) - static_cast<float>((DASH_RETURN_RANDOM / DASH_RETURN_RANDOM_DIVISOR));
+	float randomZ = GetRand(DASH_RETURN_RANDOM) - static_cast<float>((DASH_RETURN_RANDOM / DASH_RETURN_RANDOM_DIVISOR));
 	returnPos_ = { randomX,0, randomZ };
 	attackUpdate_ = &StandardBoss::AttackUpdate_Return;
 }
-
 
 int StandardBoss::GetShotCount(int count)
 {
@@ -486,28 +595,16 @@ void StandardBoss::NextState()
 	ChangeState(nextState_);
 	if (stateChangeCount_% ATTACK_STATE_NUM != 0)
 	{
-		//nextState_ = ATTACK_STATE::AROUND_MOVING;
 		nextState_ = ATTACK_STATE::AROUND;
 		return;
 	}
 	//ATTACK_STATE_NUMの倍数でパワーチャージ
 	nextState_ = ATTACK_STATE::POWER_CHARGING;
-	//int rand = GetRand(1);
-	//if (rand == 1 && IsLowHp())
-	//{
-	//	nextState_ = ATTACK_STATE::RANDOM;
-	//}
-	//else
-	//{
-	//	//nextState_ = ATTACK_STATE::AROUND;
-	//	nextState_ = ATTACK_STATE::POWER_CHARGING;
-	//}
 }
 
 bool StandardBoss::IsLowHp()const
 {
-	constexpr float LOW_HP = 0.5f;
-	return static_cast<float>(hp_) / hpMax_ <= LOW_HP;
+	return static_cast<float>(hp_) / hpMax_ <= LOW_HP_RATE;
 }
 
 bool StandardBoss::IsMovingShot()
@@ -522,8 +619,8 @@ void StandardBoss::ShotAround(ObjectManager::ShotType type, VECTOR pos, int loop
 	for (int i = 0; i < loop; i++)
 	{
 		sceneGame_->GetOManager()->CreateShot(type, pos,
-			Quaternion::Euler(0, AsoUtility::Deg2RadF(360.0f / loop) * i + addRot, 0),
-			1);
+			Quaternion::Euler(0, AsoUtility::Deg2RadF(FULL_ROTATION_DEG / loop) * i + addRot, 0),
+			SHOT_SIZE_SCALE);
 	}
 }
 

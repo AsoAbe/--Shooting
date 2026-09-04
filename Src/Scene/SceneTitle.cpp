@@ -33,20 +33,19 @@ namespace {
 }
 
 //コンストラクタ
-SceneTitle::SceneTitle(void):frame_(0)
+SceneTitle::SceneTitle(void):frame_(INITIAL_COUNT)
 {
 	Col.Read();
 
 	// LoadSoundMem で読み込む音データの音程を１オクターブ低くする
-	SetCreateSoundPitchRate(-1200.0f);
+	SetCreateSoundPitchRate(TITLE_BGM_PITCH_OFFSET);
 
 	bgmplay_ = LoadSoundMem((Application::PATH_BGM + "GameBgm/nc378681_【東方アレンジ】砕月～萃めた夢の欠片～【東方動画BGM支援】.wav").c_str());
-	//ChangeVolumeSoundMem(255 * 85 / 100, bgmplay_);
 	SoundManager::GetInstance().ChangeVolumeSoundMem_bgm(VOLUME_BGM_MAIN, bgmplay_);
 	PlaySoundMem(bgmplay_, DX_PLAYTYPE_LOOP);
 	
 	// LoadSoundMem で読み込む音データの音程を戻す
-	SetCreateSoundPitchRate(0.0f);
+	SetCreateSoundPitchRate(DEFAULT_SOUND_PITCH_OFFSET);
 
 	bgm_.SetBgmInputType(BgmType::none);
 	f_col = Col.BRed;
@@ -56,8 +55,6 @@ SceneTitle::SceneTitle(void):frame_(0)
 
 	menuList_ = {
 		"ゲームスタート",
-		//"ゲーム",
-		//"ゲーム説明",
 		"ゲームチュートリアル:",
 		"ゲームBGM",
 		"ゲームスコア",
@@ -69,19 +66,10 @@ SceneTitle::SceneTitle(void):frame_(0)
 			SceneManager::GetInstance().BgmChang(bgm_.GetBgmInputType().c_str());
 			}
 		},
-		//{"ゲーム",[this](InputManager&) {
-		//	//MessageManager::GetInstance().ShowNewMessage("Test : " + std::to_string(GetRand(9)), MessageManager::DEFAULT_MESSAGE_TIME);
-		//	}
-		//},
-		//{"ゲーム説明",[this](InputManager&) {
-		//		//MessageManager::GetInstance().ShowNewMessage("Test : " + std::to_string(GetRand(9)), MessageManager::DEFAULT_MESSAGE_TIME);
-		//	}
-		//},
+		
 		{"ゲームチュートリアル:" ,[this](InputManager&) {
 
 				UpdateKey();
-				//MessageManager::GetInstance().ShowNewMessage("Test : " + nomal_switc, MessageManager::DEFAULT_MESSAGE_TIME);
-
 			}
 		},
 		{"ゲームBGM",[this](InputManager&) {
@@ -95,12 +83,6 @@ SceneTitle::SceneTitle(void):frame_(0)
 					bgm_switc_n = false;
 					update_ = &SceneTitle::AppearUpdate;
 					}
-				//else
-				//{
-				//	bgm_switc = true;
-				//	bgm_switc_n = false;
-				//	AppearUpdate();
-				//}
 			}},
 			{"ゲームスコア",[this](InputManager&) {
 					if (scor_switc == false) {
@@ -143,13 +125,11 @@ SceneTitle::SceneTitle(void):frame_(0)
 				
 				f_col = Col.Purple;
 				f_col2 = Col.White;
-				//SceneManager::GetInstance().BgmChang(bgm_.GetBgmInputType().c_str());
 			}
 		},
 		{"U.N.オーエンは彼女なのか?",[this](InputManager&) {
 
 				bgm_.SetBgmInputType(BgmType::eMenu_UNowen);
-				//SceneManager::GetInstance().BgmChang(bgm_.GetBgmInputType().c_str());
 				f_col = Col.Yellow;
 				f_col2 = Col.BRed;
 				
@@ -160,7 +140,6 @@ SceneTitle::SceneTitle(void):frame_(0)
 				bgm_.SetBgmInputType(BgmType::eMenu_Fukanou);
 				f_col = Col.Yellow;
 				f_col2 = Col.Black;
-				//SceneManager::GetInstance().BgmChang(bgm_.GetBgmInputType().c_str());
 			}
 		},
 		{"敗北の英雄～Somehow_survived",[this](InputManager&) {
@@ -168,7 +147,6 @@ SceneTitle::SceneTitle(void):frame_(0)
 				bgm_.SetBgmInputType(BgmType::eMenu_Haiboku);
 				f_col = Col.BRed;
 				f_col2 = Col.LinePink;
-				//SceneManager::GetInstance().BgmChang(bgm_.GetBgmInputType().c_str());
 			}
 		},
 		{"砕月～萃めた夢の欠片～",[this](InputManager&) {
@@ -176,7 +154,6 @@ SceneTitle::SceneTitle(void):frame_(0)
 				bgm_.SetBgmInputType(BgmType::eMenu_himetyumeno);
 				f_col = Col.Green;
 				f_col2 = Col.Blue;
-				//SceneManager::GetInstance().BgmChang(bgm_.GetBgmInputType().c_str());
 			}
 		},
 		{"          閉じる",[this](InputManager&) {
@@ -211,19 +188,19 @@ SceneTitle::SceneTitle(void):frame_(0)
 		fontHndle_[f] = -1;
 	}
 	
-	bgmcount_ = 0;
-	currentIndex_ = 0;
-	currentIndex_b = 0;
-	currentIndex_s = 0;
+	bgmcount_ = INITIAL_COUNT;
+	currentIndex_ = INITIAL_COUNT;
+	currentIndex_b = INITIAL_COUNT;
+	currentIndex_s = INITIAL_COUNT;
 	
 	// 描画する文字列のサイズを設定
-	f_size = -1;
+	f_size = INVALID_HANDLE;
 
-	miniFont_ = -1;
-	countimg_ = 0;
-	countimg_end = 0;
-	titleModel_ = -1;
-	titleModelRotY_ = 0;
+	miniFont_ = INVALID_HANDLE;
+	countimg_ = INITIAL_COUNT;
+	countimg_end = YOZORA_DISPLAY_TIME;
+	titleModel_ = INVALID_HANDLE;
+	titleModelRotY_ = INITIAL_COUNT;
 }
 void SceneTitle::ExitBgmMenu()
 {
@@ -231,8 +208,7 @@ void SceneTitle::ExitBgmMenu()
 	bgm_switc = false;
 	DisappearUpdate();
 	update_ = &SceneTitle::NormalUpdate;
-	bgmendcount_ = 20;
-	//SceneManager::GetInstance().BgmChang(bgm_.GetBgmInputType().c_str());
+	bgmendcount_ = BGM_END_FRAME_COUNT;
 }
 void SceneTitle::ExitScorMenu()
 {
@@ -246,12 +222,12 @@ SceneTitle::~SceneTitle(void)
 	for (int f = 0; f < FONT_MAX; ++f) {
 		DeleteFontToHandle(fontHndle_[f]);
 	}
-	countimg_ = 0;
-	countimg_end = 300;
-	yc = 0;
-	frame_ = 0;
-	bgmcount_ = 0;
-	bgmendcount_ = -1;
+	countimg_ = INITIAL_COUNT;
+	countimg_end = YOZORA_DISPLAY_TIME;
+	yc = INITIAL_COUNT;
+	frame_ = INITIAL_COUNT;
+	bgmcount_ = INITIAL_COUNT;
+	bgmendcount_ = INVALID_HANDLE;
 	DeleteSoundMem(bgmplay_);
 	DeleteSoundMem(bgmtamesi_);
 	DeleteGraph(f_size);
@@ -264,10 +240,10 @@ bool SceneTitle::Init(void)
 	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FIXED_POINT);
 	SoundManager::GetInstance().SetActiveBGM(true);
 
-	titleImage = -1;
+	titleImage = INVALID_HANDLE;
 	
 	yozoraImage_[0] = LoadGraph((Application::PATH_IMAGE + "yozora1.png").c_str());
-	if (yozoraImage_[0] == -1)
+	if (yozoraImage_[0] == INVALID_HANDLE)
 	{
 		//画像読み込み失敗
 		OutputDebugString("タイトル画像読み込み失敗");
@@ -275,14 +251,14 @@ bool SceneTitle::Init(void)
 	}
 
 	yozoraImage_[1] = LoadGraph((Application::PATH_IMAGE + "yozora2.png").c_str());
-	if (yozoraImage_[1] == -1)
+	if (yozoraImage_[1] == INVALID_HANDLE)
 	{
 		//画像読み込み失敗
 		OutputDebugString("タイトル画像読み込み失敗");
 		return false;
 	}
 	yozoraImage_[2] = LoadGraph((Application::PATH_IMAGE + "yozora3.png").c_str());
-	if (yozoraImage_[2] == -1)
+	if (yozoraImage_[2] == INVALID_HANDLE)
 	{
 		//画像読み込み失敗
 		OutputDebugString("タイトル画像読み込み失敗");
@@ -291,7 +267,7 @@ bool SceneTitle::Init(void)
 
 	//タイトル画像
 	titleImage = LoadGraph((Application::PATH_IMAGE + "タイトル-東方シューティング3.png").c_str());
-	if (titleImage == -1)
+	if (titleImage == INVALID_HANDLE)
 	{
 		//画像読み込み失敗
 		OutputDebugString("タイトル画像読み込み失敗");
@@ -300,26 +276,29 @@ bool SceneTitle::Init(void)
 
 	tyrNow_ = true;
 	nomal_switc = { "on" };
-	fontHndle_[0] = CreateFontToHandle("源暎ぽっぷる Black", 35, 5
-		, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
-	fontHndle_[1] = CreateFontToHandle("源暎ぽっぷる Black", 25, 3
-		, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
-	miniFont_ = CreateFontToHandle("源暎ぽっぷる Black", CONTROL_TEXT_SIZE, 5
+	fontHndle_[0] = CreateFontToHandle("源暎ぽっぷる Black", TITLE_FONT_SIZE,
+		TITLE_FONT_EDGE_SIZE, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
+	fontHndle_[1] = CreateFontToHandle("源暎ぽっぷる Black", SUBTITLE_FONT_SIZE,
+		SUBTITLE_FONT_EDGE_SIZE, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
+	miniFont_ = CreateFontToHandle("源暎ぽっぷる Black", CONTROL_TEXT_SIZE, MINI_FONT_EDGE_SIZE
 		, DX_FONTTYPE_ANTIALIASING_EDGE_8X8);
 
 	titleModel_ = MV1LoadModel((Application::PATH_MODEL + "御札/ofuda.mv1").c_str());
-	MV1SetScale(titleModel_, VScale(AsoUtility::VECTOR_ONE, 0.3f));
-	MV1SetRotationXYZ(titleModel_, { AsoUtility::Deg2RadF(TITLE_MODEL_ROT_X),0,AsoUtility::Deg2RadF(TITLE_MODEL_ROT_Z)});
-	MV1SetPosition(titleModel_, { 0,12,0 });
-	countimg_ = 0;
-	countimg_end = 300;
+	MV1SetScale(titleModel_, VScale(AsoUtility::VECTOR_ONE, TITLE_MODEL_SCALE));
+	MV1SetRotationXYZ(titleModel_, { AsoUtility::Deg2RadF(TITLE_MODEL_ROT_X),TITLE_MODEL_ROT_Y,AsoUtility::Deg2RadF(TITLE_MODEL_ROT_Z)});
+	MV1SetPosition(titleModel_, {
+			TITLE_MODEL_POS_X,
+			TITLE_MODEL_POS_Y,
+			TITLE_MODEL_POS_Z
+		});
+	countimg_ = INITIAL_COUNT;
+	countimg_end = YOZORA_DISPLAY_TIME;
 	//タイトル画像
 	return true;
 }
 //更新
 void SceneTitle::Update(void)
 {
-	//countimg_++;
 	
 	auto& inputM = InputManager::GetInstance();
 	auto& messageM = MessageManager::GetInstance();
@@ -328,7 +307,7 @@ void SceneTitle::Update(void)
 	lastInput_ = currentInput_; // 前のプッシュ情報記録
 
 	// キーボード情報
-	char keystate[256] = {};
+	char keystate[KEY_STATE_SIZE] = {};
 	lastInput_ = currentInput_;
 	for (const auto keyvalue : inputTable_) {     // テーブルの行を回す
 		for (auto input : keyvalue.second) {      // 特定のキー入力情報
@@ -336,71 +315,43 @@ void SceneTitle::Update(void)
 			if (input.type == configuTpye::c_tyr) {
 				pressed = keystate[input.code];
 			}
-			
-			
 			currentInput_[keyvalue.first] = pressed;
 			if (pressed) {
 				break;
 			}
 		}
 	}
-	//bgmcount_++;
-	/*float settim = static_cast<int>(Application::FPS * 0.25f) * -1;
-	float messageEndTimeF = 0.25f * Application::FPS;
-	if (settim < 0 || 0.25f) {
-		bgmtamesi_ = LoadSoundMem((SceneManager::GetInstance().GetBgmChangType()).c_str());
-		PlaySoundMem(bgmtamesi_, DX_PLAYTYPE_LOOP);
-
-	}
-	else if (settim < messageEndTimeF)
-	{
-		StopSoundMem(bgmtamesi_);
-	}
-	else
-	{
-		DeleteSoundMem(bgmtamesi_);
-		return;
-	}*/
-
+	
 	UpdateYozora();
 	(this->*update_)();
-	//UpdateKey();
-	/*if (bgm_switc) {
-		return;
-	}
-	NormalUpdate();*/
-	//if (inputM.IsTrgDown(KEY_INPUT_SPACE))
-	//{
-	//	StartGameScene();
-	//}
 
 	//アニメーション
-	constexpr float ROTSPD = 90;
-	titleModelRotY_ = fmodf(titleModelRotY_+(ROTSPD/Application::FPS), 360);
+	constexpr float ROTSPD = TITLE_MODEL_ROT_SPEED;;
+	titleModelRotY_ = fmodf(titleModelRotY_+(ROTSPD/Application::FPS), FULL_ROTATION_DEG);
 	MV1SetRotationXYZ(titleModel_, { AsoUtility::Deg2RadF(TITLE_MODEL_ROT_X), AsoUtility::Deg2RadF(titleModelRotY_) ,AsoUtility::Deg2RadF(TITLE_MODEL_ROT_Z)});
 }
 //描画
 void SceneTitle::Draw(void)
 {
 	SetFontSize(f_size);
-	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, 0x110033, true);
+	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, TITLE_DRAW_COLOR, true);
 	
 	YozoraDraw();
-	if (titleModel_ != -1)
+	if (titleModel_ != INVALID_HANDLE)
 	{
 		MV1DrawModel(titleModel_);
 	}
 	else
 	{
-		DrawSphere3D({ 0,0,0 }, 32, 8, 0xFF0000, 0xFFFFFF, true);
+		DrawSphere3D(AsoUtility::VECTOR_ZERO,
+			MODEL_SPHERE_RADIUS,
+			MODEL_SPHERE_SEGMENTS,
+			MODEL_SPHERE_COLOR,
+			MODEL_SPHERE_OUTLINE_COLOR,
+			true);
 	}
 	//フェードカウント用
-	//DrawFormatStringToHandle(0, 32, Col.White, fontHndle_[0], "%d", countimg_);
-
-	DrawGraph(230, 8, titleImage, TRUE);
-	//DrawUtility::DrawStringCenter("数字キー1でメッセージのテスト"+ keystr_.size(), 0xFFFF00, 0);
-	
-	//AppearUpdate();
+	DrawGraph(TITLE_IMAGE_POS_X, TITLE_IMAGE_POS_Y, titleImage, TRUE);
 
 	if (bgm_switc){
 		NormalBgmDraw();
@@ -412,18 +363,17 @@ void SceneTitle::Draw(void)
 		return;
 	}
 
-	//NormalDraw();
-
 	DrawMenuList();
 	
 	DrawControlKey();
 
 	//スコア描画
 	ScoreManager& scoreManager = ScoreManager::GetInstance();
-	//DrawFormatString(Application::SCREEN_SIZE_X / 2 - (DrawUtility::DEFAULT_TEXT_SIZE * 3), 420,
-	//	0xffffff, "ハイスコア : %d", scoreManager.GetHighScore());
-	DrawFormatStringToHandle(8, 8,
-	0xffffff,miniFont_, "ハイスコア : %d", scoreManager.GetHighScore());
+	DrawFormatStringToHandle(
+		HIGH_SCORE_POS_X,
+		HIGH_SCORE_POS_Y,
+		DRAW_COLOR_WHITE, 
+		miniFont_, "ハイスコア : %d", scoreManager.GetHighScore());
 }
 //解放
 bool SceneTitle::Release(void)
@@ -444,9 +394,7 @@ bool SceneTitle::Release(void)
 void SceneTitle::ResetTable()
 {
 	inputTable_ = {
-			/*{"off",{
-				{configuTpye::c_tyr,KEY_INPUT_1}
-			}},*/
+
 			{"on",{
 			{configuTpye::c_tyr,KEY_INPUT_1}}
 			}
@@ -464,13 +412,8 @@ void SceneTitle::UpdateKey()
 	
 	auto& inputM = InputManager::GetInstance();
 	auto& messageM = MessageManager::GetInstance();
-	/*if (inputM.GetInstance().IsTrgDown(KEY_INPUT_RETURN)) {
-		messageM.ShowNewMessage("Test : " , MessageManager::DEFAULT_MESSAGE_TIME);
-	}*/
-
 
 	if (tyrNow_ == true) {
-		//messageM.ShowNewMessage("Test : off", MessageManager::DEFAULT_MESSAGE_TIME);
 		nomal_switc = { "off" };
 		tyrNow_ = false;
 		GetMod();
@@ -478,29 +421,10 @@ void SceneTitle::UpdateKey()
 	else
 	{
 		nomal_switc = { "on" };
-		//messageM.ShowNewMessage("Test : on", MessageManager::DEFAULT_MESSAGE_TIME);
 		tyrNow_ = true;
 		GetMod();
 	}
-		
-	//if (inputM.GetInstance().IsTrgDown(KEY_INPUT_R)) {
-	//	if (tyrNow_ == false) {
-	//		//messageM.ShowNewMessage("Test : off", MessageManager::DEFAULT_MESSAGE_TIME);
-	//		nomal_switc = { "off" };
-	//		tyrNow_ = true;
-	//	}
-	//	else  
-	//	{
-	//		nomal_switc = { "on" };
-	//		//messageM.ShowNewMessage("Test : on", MessageManager::DEFAULT_MESSAGE_TIME);
-	//		tyrNow_ = false;
-	//	}
-	//	messageM.ShowNewMessage("Test : " + nomal_switc, MessageManager::DEFAULT_MESSAGE_TIME);
-	//}
-			
-		
-	//SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::GAME, true);
-	
+
 }
 
 void SceneTitle::UpdateYozora()
@@ -512,9 +436,9 @@ void SceneTitle::UpdateYozora()
 		// 表示時間を超えたらフェード開始
 		if (countimg_ >= displayTime) {
 			isFading = true;
-			fadeCounter = 0;
-			countimg_ = 0;
-			nextYc = (yc + 1) % YOZORA_MAX;
+			fadeCounter = INITIAL_COUNT;
+			countimg_ = INITIAL_COUNT;
+			nextYc = (yc + NEXT_IMAGE_INDEX_OFFSET) % YOZORA_MAX;
 		}
 	}
 	else {
@@ -525,84 +449,71 @@ void SceneTitle::UpdateYozora()
 		if (fadeCounter >= fadeTime) {
 			yc = nextYc;
 			isFading = false;
-			fadeCounter = 0;
+			fadeCounter = INITIAL_COUNT;
 		}
 	}
 }
 
 void SceneTitle::DrawMenuList()
 {
-	constexpr int line_start_y = margin_size + 450;
-	constexpr int line_start_x = margin_size + 550;
+	constexpr int line_start_y = margin_size + MENU_LINE_START_Y_OFFSET;
+	constexpr int line_start_x = margin_size + MENU_LINE_START_X_OFFSET;
 	int lineY = line_start_y;
 	
-	int lineX2 = line_start_x + 388;
+	int lineX2 = line_start_x + MENU_LINE_WIDTH;
 	
 	unsigned int col2 = Col.SkyBlue;
-	//unsigned int Col2 = Col.Black;
 	f_size = 35;
 	auto& currentStr = menuList_[currentIndex_];
 	auto& currentStr2 = "ゲームチュートリアル:";
 	for (auto& row : menuList_) {
 		int lineX = line_start_x;
-		int lineY2 = line_start_y + 40;
+		int lineY2 = line_start_y + MENU_LINE_HEIGHT;
 		
 		unsigned int col = Col.SkyBlue;
 		
 		if (row == currentStr) {
 
-			DrawString(lineX - 30, lineY, "⇒", 0xff0000);
-			col = 0xff00ff;
-			//col2 = 0xff00f;
-			lineX += 10;
-			//lineX2 += 10;
+			DrawString(lineX - MENU_ARROW_X_OFFSET, lineY, "⇒", MENU_ARROW_COLOR);
+			col = MENU_SELECTED_COLOR;
+			lineX += MENU_SELECTED_X_OFFSET;
 			
-			//lineY2 = +120;
-			SetFontSize(0);
+			SetFontSize(FONT_SIZE_RESET);
 		}
 		else if (currentStr == currentStr2) {
-
-			
-
-			col2 = 0xff00ff;
-			//Col2 = Col.LinePink;
-			lineX2 = line_start_x+ 398;
-			//lineX21 = 390;
-			//lineY2 = +120;
-			//lineY2 -= menu_line_height;
+			col2 = MENU_SELECTED_COLOR;
+			lineX2 = line_start_x + MENU_TUTORIAL_X_OFFSET;
 		}
 
-		DrawFormatStringToHandle(lineX + 1, lineY + 1, 0x000000, fontHndle_[0], "%s", row.c_str());
+		DrawFormatStringToHandle(lineX + 1, lineY + 1, DRAW_COLOR_BLACK, fontHndle_[0], "%s", row.c_str());
 		DrawFormatStringToHandle(lineX, lineY, col, fontHndle_[0], "%s", row.c_str());
 
-		DrawStringToHandle(lineX2+ 1, lineY2 + 1, nomal_switc.c_str(), 0x000000, fontHndle_[0]);
+		DrawStringToHandle(lineX2+ 1, lineY2 + 1, nomal_switc.c_str(), DRAW_COLOR_BLACK, fontHndle_[0]);
 		DrawStringToHandle(lineX2, lineY2, nomal_switc.c_str(), col2, fontHndle_[0]);
 
 		lineY += menu_line_height;
-		//lineY2 += menu_line_height;
 	}
-	
-	//lineY2 -= menu_line_height;
 }
 
 void SceneTitle::DrawBgmList()
 {
-	constexpr int line_start_y = margin_size + 350;
-	constexpr int line_start_x = margin_size + 460;
+	constexpr int line_start_y = margin_size + BGM_LINE_START_Y_OFFSET;
+	constexpr int line_start_x = margin_size + BGM_LINE_START_X_OFFSET;
 	int lineY = line_start_y;
 	f_size = 35;
 	auto currentStr = menuList_b[currentIndex_b];
 	for (auto& row : menuList_b) {
 		int lineX = line_start_x;
-		unsigned int col = 0x4444ff;
+		unsigned int col = MENU_DEFAULT_COLOR;
 		if (row == currentStr) {
 
-			DrawString(lineX - 40, lineY, "⇒", 0xff0000);
-			col = 0xff00ff;
-			lineX += 20;
-			SetFontSize(0);
+			DrawString(lineX - BGM_SELECTED_X_OFFSET, lineY, "⇒", MENU_ARROW_COLOR);
+			col = MENU_SELECTED_COLOR;
+			lineX += BGM_SELECTED_MOVE_X;
+
+			SetFontSize(FONT_SIZE_RESET);
 		}
-		DrawFormatStringToHandle(lineX + 1, lineY + 1, 0x000000, fontHndle_[0], "%s", row.c_str(), nomal_switc.c_str());
+		DrawFormatStringToHandle(lineX + MENU_TEXT_SHADOW_OFFSET, lineY + MENU_TEXT_SHADOW_OFFSET, DRAW_COLOR_BLACK, fontHndle_[0], "%s", row.c_str(), nomal_switc.c_str());
 		DrawFormatStringToHandle(lineX, lineY, col, fontHndle_[0], "%s", row.c_str(), nomal_switc.c_str());
 		lineY += menu_line_height;
 	}
@@ -614,41 +525,38 @@ void SceneTitle::DrawScorList()
 	ScoreData scoreData;
 	const Size& wsize = Application::GetInstance().GetWindowSize();
 
-	constexpr int Sline_start_y = margin_size + 250;
-	constexpr int line_start_y = margin_size + 550;
-	constexpr int line_start_x = margin_size + 460;
+	constexpr int Sline_start_y = margin_size + SCORE_LINE_START_Y_OFFSET;
+	constexpr int line_start_y = margin_size + SCORE_LIST_START_Y_OFFSET;
+	constexpr int line_start_x = margin_size + SCORE_LINE_START_X_OFFSET;
+
 	int lineY = line_start_y;
 	int SlineY = Sline_start_y;
-	f_size = 35;
+	f_size = TITLE_FONT_SIZE;
 	auto currentStr = menuList_s[currentIndex_s];
 	for (auto& row : menuList_s) {
 		int lineX = line_start_x;
-		unsigned int col = 0x4444ff;
+		unsigned int col = MENU_DEFAULT_COLOR;
 		if (row == currentStr) {
 
-			DrawString(lineX - 40, lineY, "⇒", 0xff0000);
-			col = 0xff00ff;
-			lineX += 20;
-			SetFontSize(0);
+			DrawString(lineX - BGM_SELECTED_X_OFFSET, lineY, "⇒", MENU_ARROW_COLOR);
+			col = MENU_SELECTED_COLOR;
+			lineX += BGM_SELECTED_MOVE_X;
+
+			SetFontSize(FONT_SIZE_RESET);
 		}
 		scoreData.DrawScoreBoard(wsize.width, SlineY, fontHndle_[0], scoreData.scoreBoard_);
-		DrawFormatStringToHandle(lineX + 1, lineY + 1, 0x000000, fontHndle_[0], "%s", row.c_str(), nomal_switc.c_str());
+		DrawFormatStringToHandle(lineX + MENU_TEXT_SHADOW_OFFSET, lineY + MENU_TEXT_SHADOW_OFFSET, DRAW_COLOR_BLACK, fontHndle_[0], "%s", row.c_str(), nomal_switc.c_str());
 		DrawFormatStringToHandle(lineX, lineY, col, fontHndle_[0], "%s", row.c_str(), nomal_switc.c_str());
 		lineY += menu_line_height;
-		
 	}
 }
 
 void SceneTitle::YozoraDraw()
 {
-	
-
-
-
 	if (isFading) {
 		float t = static_cast<float>(fadeCounter) / fadeTime;
-		int alphaOut = static_cast<int>((1.0f - t) * 255);
-		int alphaIn = static_cast<int>(t * 255);
+		int alphaOut = static_cast<int>((FADE_RATE_MAX - t) * FULL_ALPHA);
+		int alphaIn = static_cast<int>(t * FULL_ALPHA);
 
 		// 現在の画像をフェードアウト
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alphaOut);
@@ -658,42 +566,12 @@ void SceneTitle::YozoraDraw()
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alphaIn);
 		DrawGraph(0, 0, yozoraImage_[nextYc], true);
 
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);  // 元に戻す
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, INITIAL_COUNT);  // 元に戻す
 	}
 	else {
 		// 通常描画
 		DrawGraph(0, 0, yozoraImage_[yc], true);
 	}
-	
-	/*
-	for (auto& img : yozoraImage_) {
-			
-		
-
-			DrawGraph(0, 0, yozoraImage_[yc], true);
-
-
-
-		
-		if (1200 <= countimg_)
-		{
-			countimg_ = 0;
-			yc = 0;
-			countimg_end = 300;
-		}
-		else if (countimg_end <= countimg_)
-		{
-
-			
-			yc += 1;
-			countimg_end += countimg_end;
-
-			
-		}
-		
-		
-	}*/
-	
 }
 
 std::string SceneTitle::GetMod()
@@ -707,19 +585,19 @@ void SceneTitle::NormalUpdate()
 	auto& messageM = MessageManager::GetInstance();
 	SoundManager& sManager = SoundManager::GetInstance();
 	if (inputM.IsTrgDown(KEY_INPUT_UP)) {
-		currentIndex_ = (currentIndex_ + menuList_.size() - 1) % menuList_.size();
+		currentIndex_ = static_cast<int>((currentIndex_ + menuList_.size() - MENU_INDEX_PREVIOUS_OFFSET) % menuList_.size());
 		sManager.PlaySE(SoundManager::SOUND_ID::CURSOR, true);
 	}
 	else if (inputM.IsTrgDown(KEY_INPUT_DOWN)) {
-		currentIndex_ = (currentIndex_ + 1) % menuList_.size();
+		currentIndex_ = (currentIndex_ + MENU_INDEX_NEXT_OFFSET) % menuList_.size();
 		sManager.PlaySE(SoundManager::SOUND_ID::CURSOR, true);
 	}
 	if (inputM.IsTrgDown(KEY_INPUT_X))
 	{
 		//最上段に戻す
-		if (currentIndex_ != 0)
+		if (currentIndex_ != MENU_INDEX_FIRST)
 		{
-			currentIndex_ = 0;
+			currentIndex_ = MENU_INDEX_FIRST;
 			sManager.PlaySE(SoundManager::SOUND_ID::CURSOR, true);
 		}
 	}
@@ -752,46 +630,35 @@ void SceneTitle::NormalUpdate()
 		sManager.PlaySE(SoundManager::SOUND_ID::CURSOR, true);
 
 		return;
-
 	}
-
 }
 
 void SceneTitle::bgmCountUpdat()
 {
 	SceneManager::GetInstance().BgmChang(bgm_.GetBgmInputType().c_str());
 	SoundManager& sManager = SoundManager::GetInstance();
-	//ChangeVolumeSoundMem(255 * 35 / 100, bgmplay_);
-	sManager.ChangeVolumeSoundMem_bgm(static_cast<int>(VOLUME_BGM_MAIN * 0.35f), bgmplay_);
-	if (bgmcount_ > 0)
+	sManager.ChangeVolumeSoundMem_bgm(static_cast<int>(VOLUME_BGM_MAIN * BGM_PREVIEW_VOLUME_RATE), bgmplay_);
+	if (bgmcount_ > INITIAL_COUNT)
 	{
-		bgmcount_ = 0;
+		bgmcount_ = INITIAL_COUNT;
 		DeleteSoundMem(bgmtamesi_);
 		bgmtamesi_ = LoadSoundMem((SceneManager::GetInstance().GetBgmChangType()).c_str());
 
-		sManager.ChangeVolumeSoundMem_bgm(static_cast<int>(VOLUME_BGM_TITLE * 0.75f), bgmtamesi_);
-		//ChangeVolumeSoundMem(255 * 75 / 100, bgmtamesi_);
+		sManager.ChangeVolumeSoundMem_bgm(static_cast<int>(VOLUME_BGM_TITLE * BGM_TITLE_VOLUME_RATE), bgmtamesi_);
 		PlaySoundMem(bgmtamesi_, DX_PLAYTYPE_BACK);
 	}
 
 	if (bgmcount_ <= bgmendcount_)
 	{
 		sManager.ChangeVolumeSoundMem_bgm(VOLUME_BGM_MAIN, bgmplay_);
-		//ChangeVolumeSoundMem(255 * 85 / 100, bgmplay_);
-		bgmendcount_ = -1;
-		bgmcount_ = 0;
+		bgmendcount_ = INVALID_COUNT;
+		bgmcount_ = INITIAL_COUNT;
 		DeleteSoundMem(bgmtamesi_);
 	}
-	 
-
 }
 
 void SceneTitle::AppearUpdate()
 {
-	/*if (bgm_switc_n) {
-		return;
-	}*/
-	
 	if (++frame_ >= appear_interval) {
 		if (bgm_switc) {
 			bgmcount_++;
@@ -802,18 +669,16 @@ void SceneTitle::AppearUpdate()
 			
 			NormalScorUpdate();
 		}
-		
 	}
 }
 
 void SceneTitle::DisappearUpdate()
 {
 	
-	if (--frame_ <= 0) {
+	if (--frame_ <= INITIAL_COUNT) {
 		NormalUpdate();
 		ProcessDraw();
-		//currentIndex_b = 0;
-		bgmcount_ =0;
+		bgmcount_ = INITIAL_COUNT;
 	}
 }
 
@@ -832,24 +697,14 @@ void SceneTitle::NormalBgmUpdate()
 		
 		ProcessDraw();
 		DisappearUpdate();
-		
 	}
 	
-
-	//if (inputM.IsTrgDown(KEY_INPUT_X))
-	//{
-	//	//ウィンドウを閉じて以降の処理をスキップ
-	//	sManager.PlaySE(SoundManager::SOUND_ID::CURSOR, true);
-	//	ExitBgmMenu();
-	//	return;
-	//}
-
 	if (inputM.GetInstance().IsTrgDown(KEY_INPUT_UP)) {
-		currentIndex_b = (currentIndex_b + menuList_b.size() - 1) % menuList_b.size();
+		currentIndex_b = static_cast<int>((currentIndex_b + menuList_b.size() - MENU_INDEX_PREVIOUS_OFFSET) % menuList_b.size());
 		sManager.PlaySE(SoundManager::SOUND_ID::CURSOR, true);
 	}
 	else if (inputM.GetInstance().IsTrgDown(KEY_INPUT_DOWN)) {
-		currentIndex_b = (currentIndex_b + 1) % menuList_b.size();
+		currentIndex_b = (currentIndex_b + MENU_INDEX_NEXT_OFFSET) % menuList_b.size();
 		sManager.PlaySE(SoundManager::SOUND_ID::CURSOR, true);
 	}
 	if (inputM.GetInstance().IsTrgDown(KEY_INPUT_Z)) {
@@ -859,7 +714,9 @@ void SceneTitle::NormalBgmUpdate()
 		bgmCountUpdat();
 		
 		return;
-	}	if (inputM.GetInstance().IsTrgDown(KEY_INPUT_SPACE)) {
+	}	
+	
+	if (inputM.GetInstance().IsTrgDown(KEY_INPUT_SPACE)) {
 		auto selectedName_b = menuList_b[currentIndex_b];
 		menuFuncTable_b[selectedName_b](inputM);
 		
@@ -868,36 +725,26 @@ void SceneTitle::NormalBgmUpdate()
 		return;
 	}
 
-	if (1000 <= bgmcount_) {
-		//ChangeVolumeSoundMem(255 * 85 / 100, bgmplay_);
+	if (BGM_FADE_END_FRAME <= bgmcount_) {
 		sManager.ChangeVolumeSoundMem_bgm(VOLUME_BGM_MAIN, bgmplay_);
 		
 		DeleteSoundMem(bgmtamesi_);
-		bgmcount_ = 0;
+		bgmcount_ = INITIAL_COUNT;
 	}
-	else if (950 <= bgmcount_) {
-		//ChangeVolumeSoundMem(255 * 20 / 100, bgmtamesi_);
-		sManager.ChangeVolumeSoundMem_bgm(static_cast<int>(VOLUME_BGM_TITLE * 0.2f), bgmtamesi_);
+	else if (BGM_FADE_NEAR_END_FRAME <= bgmcount_) {
+		sManager.ChangeVolumeSoundMem_bgm(static_cast<int>(VOLUME_BGM_TITLE * BGM_FADE_VOLUME_RATE), bgmtamesi_);
 
 	}
-	else if (900 <= bgmcount_) {
-		//ChangeVolumeSoundMem(255 * 35 / 100, bgmtamesi_);
-		sManager.ChangeVolumeSoundMem_bgm(static_cast<int>(VOLUME_BGM_TITLE * 0.35f), bgmtamesi_);
+	else if (BGM_FADE_MIDDLE_FRAME <= bgmcount_) {
+		sManager.ChangeVolumeSoundMem_bgm(static_cast<int>(VOLUME_BGM_TITLE * BGM_FADE_MIDDLE_VOLUME_RATE), bgmtamesi_);
 
 	}
-	else if (850 <= bgmcount_) {
-		//ChangeVolumeSoundMem(255 * 45 / 100, bgmtamesi_);
-		sManager.ChangeVolumeSoundMem_bgm(static_cast<int>(VOLUME_BGM_TITLE * 0.45f), bgmtamesi_);
+	else if (BGM_FADE_START_FRAME <= bgmcount_) {
+		sManager.ChangeVolumeSoundMem_bgm(static_cast<int>(VOLUME_BGM_TITLE * BGM_FADE_NEAR_END_VOLUME_RATE), bgmtamesi_);
 
 	}
-
-	
 
 	if (bgm_switc==false) {
-
-		//ProcessDraw();
-		
-
 	}
 }
 
@@ -907,20 +754,16 @@ void SceneTitle::NormalScorUpdate()
 	auto& messageM = MessageManager::GetInstance();
 	SoundManager& sManager = SoundManager::GetInstance();
 	if (scor_switc) {
-
-		
-		
-
 	}
 	ProcessDraw();
 	DisappearUpdate();
 
 	if (inputM.GetInstance().IsTrgDown(KEY_INPUT_UP)) {
-		currentIndex_s = (currentIndex_s + menuList_s.size() - 1) % menuList_s.size();
+		currentIndex_s = static_cast<int>((currentIndex_s + menuList_s.size() - MENU_INDEX_PREVIOUS_OFFSET) % menuList_s.size());
 		sManager.PlaySE(SoundManager::SOUND_ID::CURSOR, true);
 	}
 	else if (inputM.GetInstance().IsTrgDown(KEY_INPUT_DOWN)) {
-		currentIndex_s = (currentIndex_s + 1) % menuList_s.size();
+		currentIndex_s = (currentIndex_s + MENU_INDEX_NEXT_OFFSET) % menuList_s.size();
 		sManager.PlaySE(SoundManager::SOUND_ID::CURSOR, true);
 	}
 	if (inputM.GetInstance().IsTrgDown(KEY_INPUT_Z)) {
@@ -939,44 +782,59 @@ void SceneTitle::NormalScorUpdate()
 void SceneTitle::ProcessDraw()
 {
 	const Size& wsize = Application::GetInstance().GetWindowSize();
-	int centerY = wsize.height / 2; // 画面中心Y
-	int frameHalfHeight = (wsize.height - margin_size * 2) / 2; // 枠の高さの半分
+	int centerY = wsize.height / FRAME_MARGIN_COUNT; // 画面中心Y
+	int frameHalfHeight = (wsize.height - margin_size * FRAME_MARGIN_COUNT) / FRAME_MARGIN_COUNT; // 枠の高さの半分
 
 	// 出現・消滅時の高さ変化率(0.0～1.0)
 	float rate = static_cast<float>(frame_) /
 		static_cast<float>(appear_interval);
 
-	frameHalfHeight *= rate;
+	frameHalfHeight *= static_cast<int>(rate);
 
 	// 白っぽいセロファン
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
-	DrawBox(margin_size, centerY - frameHalfHeight,
-		wsize.width - margin_size, centerY + frameHalfHeight,
-		0xffffff, true);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, BLEND_ALPHA_PROCESS);
+	DrawBox(margin_size,
+		centerY - frameHalfHeight,
+		wsize.width - margin_size,
+		centerY + frameHalfHeight,
+		DRAW_COLOR_WHITE,
+		true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, INITIAL_COUNT);
 	// 白枠
-	DrawBoxAA(margin_size, centerY - frameHalfHeight,
-		wsize.width - margin_size, centerY + frameHalfHeight,
-		0xffffff, false, 3.0f);
+	DrawBoxAA(static_cast<float>((margin_size)),
+		static_cast<float>(centerY - frameHalfHeight),
+		static_cast<float>(wsize.width - margin_size),
+		static_cast<float>(centerY + frameHalfHeight),
+		DRAW_COLOR_WHITE,
+		false, 
+		FRAME_LINE_WIDTH);
 }
 
 void SceneTitle::NormalDraw()
 {
 	const Size& wsize = Application::GetInstance().GetWindowSize();
-	constexpr int line_start_y = margin_size + 80;
-	constexpr int line_start_x = margin_size + 40;
+	constexpr int line_start_y = margin_size + SCORE_FRAME_POS_Y_OFFSET;
+	constexpr int line_start_x = SCORE_FRAME_POS_X_OFFSET;
 
 	// 白っぽいセロファン
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 168);
-	DrawBox(line_start_x, line_start_y,
-		wsize.width - line_start_x, wsize.height - line_start_y,
-		0xffffff, true);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, BLEND_ALPHA_MENU);
+	DrawBox(line_start_x,
+		line_start_y,
+		wsize.width - line_start_x,
+		wsize.height - line_start_y,
+		DRAW_COLOR_WHITE,
+		true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, INITIAL_COUNT);
 	// 白枠
-	DrawBoxAA(line_start_x, line_start_y,
-		wsize.width - line_start_x, wsize.height - line_start_y,
-		0xffffff, false, 3.0f);
-	DrawStringToHandle(500, 150, "スコアランキング", 0x0000ff, fontHndle_[0], Col.LinePink);
+	DrawBoxAA(static_cast<float>(line_start_x),
+		static_cast<float>(line_start_y),
+		static_cast<float>(wsize.width - line_start_x),
+		static_cast<float>(wsize.height - line_start_y),
+		DRAW_COLOR_WHITE,
+		false,
+		FRAME_LINE_WIDTH);
+	DrawStringToHandle(SCORE_TITLE_POS_X,
+		SCORE_TITLE_POS_Y, "スコアランキング", DRAW_COLOR_BLUE, fontHndle_[0], Col.LinePink);
 	DrawScorList();
 }
 
@@ -984,20 +842,24 @@ void SceneTitle::NormalBgmDraw()
 {
 	const Size& wsize = Application::GetInstance().GetWindowSize();
 	// 白っぽいセロファン
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 168);
-	DrawBox(margin_size, margin_size,
-		wsize.width - margin_size, wsize.height - margin_size,
-		0xffffff, true);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, BLEND_ALPHA_MENU);
+	DrawBox(margin_size,
+		margin_size,
+		wsize.width - margin_size,
+		wsize.height - margin_size,
+		DRAW_COLOR_WHITE,
+		true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, INITIAL_COUNT);
 	// 白枠
-	DrawBoxAA(margin_size, margin_size,
-		wsize.width - margin_size, wsize.height - margin_size,
-		0xffffff, false, 3.0f);
-	DrawStringToHandle(margin_size + 10, margin_size + 10, "現在の曲", 0x0000ff, fontHndle_[0],Col.Pink);
-	DrawStringToHandle(margin_size + 10, margin_size + 50, bgm_.GetBgmName().c_str(), f_col, fontHndle_[1], f_col2);
-	/*DrawFormatStringToHandle(margin_size + 10, margin_size + 80
-		, Col.White, fontHndle_[0], "現在のtime %d"
-		, bgmcount_ );*/
+	DrawBoxAA(static_cast<float>(margin_size),
+		static_cast<float>(margin_size),
+		static_cast<float>(wsize.width - margin_size),
+		static_cast<float>(wsize.height - margin_size),
+		DRAW_COLOR_WHITE,
+		false,
+		FRAME_LINE_WIDTH);
+	DrawStringToHandle(margin_size + BGM_NAME_POS_X_OFFSET, margin_size + BGM_NAME_POS_Y_OFFSET, "現在の曲", 0x0000ff, fontHndle_[0],Col.Pink);
+	DrawStringToHandle(margin_size + BGM_NAME_POS_X_OFFSET, margin_size + BGM_NAME_POS_Y_OFFSET_2, bgm_.GetBgmName().c_str(), f_col, fontHndle_[1], f_col2);
 	DrawBgmList();
 }
 
@@ -1016,7 +878,6 @@ void SceneTitle::StartGameScene()
 void SceneTitle::DrawControlKey()
 {
 	constexpr int SPACE = 8;
-	//constexpr int KEY_TEXT_ROW = 6;
 	constexpr int KEY_TEXT_ROW = 3;
 
 	const SoundManager& sManager = SoundManager::GetInstance();
@@ -1024,23 +885,15 @@ void SceneTitle::DrawControlKey()
 	//上から順に描画
 	int drawY = Application::SCREEN_SIZE_Y - SPACE - (CONTROL_TEXT_SIZE * KEY_TEXT_ROW);
 
-	DrawStringToHandle(SPACE, drawY, "矢印キー     : 選択", 0xffffff, miniFont_);
+	DrawStringToHandle(SPACE, drawY, "矢印キー     : 選択", DRAW_COLOR_WHITE, miniFont_);
 	//行を一つ下に
 	drawY += CONTROL_TEXT_SIZE;
 
-	DrawStringToHandle(SPACE, drawY, "Zキー        : 決定", 0xffffff, miniFont_);
+	DrawStringToHandle(SPACE, drawY, "Zキー        : 決定", DRAW_COLOR_WHITE, miniFont_);
 	drawY += CONTROL_TEXT_SIZE;
 
-	//DrawStringToHandle(SPACE, drawY, "Xキー        : キャンセル", 0xffffff, miniFont_);
-	//drawY += CONTROL_TEXT_SIZE;
-
-	DrawFormatStringToHandle(SPACE, drawY, 0xffffff, miniFont_, "Cキー        : BGM切り替え %s",
+	DrawFormatStringToHandle(SPACE, drawY, DRAW_COLOR_WHITE, miniFont_, "Cキー        : BGM切り替え %s",
 		sManager.IsActiveBGM() ? "(現在の状態 : on)" : "(現在の状態 : off)");
 	drawY += CONTROL_TEXT_SIZE;
 
-	//DrawStringToHandle(SPACE, drawY, "Rキー        : チュートリアル切り替え", 0xffffff, miniFont_);
-	//drawY += CONTROL_TEXT_SIZE;
-
-	//DrawStringToHandle(SPACE, drawY, "スペースキー: ゲームスタート", 0xffffff, miniFont_);
-	//drawY += CONTROL_TEXT_SIZE;
 }
