@@ -44,12 +44,12 @@ namespace
 
 ScorePanel::BarStruct::BarStruct()
 {
-	this->x = 0;
-	this->y = 0;
+	this->x = DRAW_POS_START;
+	this->y = DRAW_POS_START;
 	this->size = BAR_SIZE;
 	this->width = BAR_WIDTH;
-	this->animTimer = 0;
-	this->flashTimer = 0;
+	this->animTimer = INITIAL_COUNTER;
+	this->flashTimer = INITIAL_COUNTER;
 }
 
 ScorePanel::BarStruct::BarStruct(int x, int y)
@@ -58,8 +58,8 @@ ScorePanel::BarStruct::BarStruct(int x, int y)
 	this->y = y;
 	this->size = BAR_SIZE;
 	this->width = BAR_WIDTH;
-	this->animTimer = 0;
-	this->flashTimer = 0;
+	this->animTimer = INITIAL_COUNTER;
+	this->flashTimer = INITIAL_COUNTER;
 }
 
 void ScorePanel::BarStruct::Flash()
@@ -72,26 +72,26 @@ void ScorePanel::BarStruct::Anim()
 	//タイマーに値をセット
 	animTimer = BAR_ANIM_TIME;
 	//光る演出をキャンセル
-	flashTimer = 0;
+	flashTimer = INITIAL_COUNTER;
 }
 
 void ScorePanel::BarStruct::Update()
 {
-	if (animTimer > 0)
+	if (animTimer > INITIAL_COUNTER)
 	{
 		animTimer--;
 	}
 	else
 	{
-		animTimer = 0;
+		animTimer = INITIAL_COUNTER;
 	}
-	if (flashTimer > 0)
+	if (flashTimer > INITIAL_COUNTER)
 	{
 		flashTimer--;
 	}
 	else
 	{
-		flashTimer = 0;
+		flashTimer = INITIAL_COUNTER;
 	}
 }
 
@@ -99,13 +99,13 @@ ScorePanel::ScorePanel(SceneGame& sceneGame) :sceneGame_(sceneGame)
 {
 	lifeImg_ = LoadGraph((Application::PATH_IMAGE + "Life.png").c_str());
 	bgImg_ = LoadGraph((Application::PATH_IMAGE + "Image_fx.jpg").c_str());
-	counter_ = 0;
+	counter_ = INITIAL_COUNTER;
 	barPSMaterial_ = new PixelShaderMaterial("psFlash.cso", 2);
 	constexpr float FLASH_POW = 0.8f;
 	barPSMaterial_->SetValue(FLASH_POW, 1);
 	barPSRenderer_ = new PixelShaderRenderer(*barPSMaterial_);
 
-	barPSRenderer_->MakeSquereVertex(0, 0, BAR_SCREEN_SIZE, BAR_SCREEN_SIZE);
+	barPSRenderer_->MakeSquereVertex(DRAW_POS_START, DRAW_POS_START, BAR_SCREEN_SIZE, BAR_SCREEN_SIZE);
 
 	barScreen_ = MakeScreen(BAR_SCREEN_SIZE, BAR_SCREEN_SIZE, TRUE);
 	trans_ = nullptr;
@@ -130,53 +130,50 @@ void ScorePanel::Draw()
 	//メインスクリーン
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
 
-	DrawExtendGraph(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, bgImg_, false);
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 153);
-	DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, 0x000000, true);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	DrawExtendGraph(DRAW_POS_START, DRAW_POS_START, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, bgImg_, false);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, BLEND_ALPHA_BACKGROUND);
+	DrawBox(DRAW_POS_START, DRAW_POS_START, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, DRAW_COLOR_BLACK, true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, DRAW_BLEND_RESET);
 
 	//バーのy始点
-	int ENbarY = 88;  //エネミー用スコアバーの高さ
-	int barY = 420;    //プレイヤー用スコアバーの高さ
+	int ENbarY = ENEMY_BAR_Y;  //エネミー用スコアバーの高さ
+	int barY = PLAYER_BAR_Y;    //プレイヤー用スコアバーの高さ
 
 	const Player& player = *(sceneGame_.GetOManager()->GetPlayer());
 	//右側パネルの始点のx
-	constexpr int PANEL_R_POS_X = Application::MAINGAME_POS_X + Application::MAINGAME_SIZE_X+8;
+	constexpr int PANEL_R_POS_X = Application::MAINGAME_POS_X + Application::MAINGAME_SIZE_X+ PANEL_POS_X_OFFSET;
 #pragma region PlayerHp
 	
 	//テキスト描画
-	DrawString(PANEL_R_POS_X, barY - DrawUtility::DEFAULT_TEXT_SIZE, "PLAYER", 0xffffff);
+	DrawString(PANEL_R_POS_X, barY - DrawUtility::DEFAULT_TEXT_SIZE, "PLAYER", DRAW_COLOR_WHITE);
 
 	//バー描画
 	playerHpBar_.x = PANEL_R_POS_X;
 	playerHpBar_.y = barY;
 	DrawPlayerHpBar(player, playerHpBar_,true,mainScreen);
-	barY += BAR_WIDTH+8;
+	barY += BAR_WIDTH+ PANEL_POS_X_OFFSET;
 
 	//滑空スタミナ
-	//VECTOR stampos = player.GetPos();
-	//int barX = DrawUtility::GetBarX(PANEL_R_POS_X+ FRAME_WIDTH_BAR, BAR_SIZE, player.GetStamina(), player.GetStaminaMax());
 	DrawUtility::DrawBarGlossy({ PANEL_R_POS_X ,barY},
 		PANEL_R_POS_X + BAR_SIZE, BAR_WIDTH,
 		{255,255,0}, player.GetStamina(), player.GetStaminaMax());
 	barY += BAR_WIDTH+4+ LIFE_IMG_HALF;
 
 	//ライフ
-	constexpr int LIFE_LOW = 1;
 	if (player.GetLife() > LIFE_LOW || DrawUtility::Blink(counter_))
 	{
 		//life一定以下で点滅として使う
 		DrawUtility::DrawBarImg(
 			PANEL_R_POS_X + LIFE_IMG_HALF, barY,
-			player.GetLife(), player.GetLifeMax(), lifeImg_, -1, LIFE_IMG_SIZE, -1);
+			player.GetLife(), player.GetLifeMax(), lifeImg_, INVALID_HANDLE, LIFE_IMG_SIZE, INVALID_HANDLE);
 	}
 #pragma endregion
 
 	//ボスhp描画
 	const CharacterBase* boss = sceneGame_.GetOManager()->GetTargetCharacter();
-	constexpr int BOSS_HP_Y = 64;
+	constexpr int BOSS_HP_Y = BOSS_HP_Y_OFFSET;
 	ENbarY += BOSS_HP_Y;
-	DrawString(PANEL_R_POS_X, ENbarY, "ENEMY", 0xffffff);
+	DrawString(PANEL_R_POS_X, ENbarY, "ENEMY", DRAW_COLOR_WHITE);
 	ENbarY += DrawUtility::DEFAULT_TEXT_SIZE;
 	bossHpBar_.x = PANEL_R_POS_X;
 	bossHpBar_.y = ENbarY;
@@ -198,14 +195,14 @@ void ScorePanel::DrawProgressBar(const BarStruct& bar, bool useScreen, int outSc
 		SetDrawScreen(barScreen_);
 		ClearDrawScreen();
 		//描画座標を左上に
-		drawX = 0;
-		drawY = 0;
+		drawX = DRAW_POS_START;
+		drawY = DRAW_POS_START;
 		//マテリアルに値セット
 		barPSMaterial_->SetValue(static_cast<float>(bar.flashTimer) / BAR_FLASH_TIME);
 	}
 	else
 	{
-		if (bar.animTimer > 0)
+		if (bar.animTimer > INITIAL_COUNTER)
 		{
 			//演出中は上下にランダムに動かす(useScreen == false)
 			drawY += HP_ANIM_RAND / 2 - GetRand(HP_ANIM_RAND - 1);
@@ -222,17 +219,17 @@ void ScorePanel::DrawProgressBar(const BarStruct& bar, bool useScreen, int outSc
 	{
 		drawX = bar.x;
 		drawY = bar.y;
-		if (bar.animTimer > 0)
+		if (bar.animTimer > INITIAL_COUNTER)
 		{
 			//演出中は上下にランダムに動かす(useScreen == true)
 			drawY += HP_ANIM_RAND / 2 - GetRand(HP_ANIM_RAND - 1);
 		}
 		//barスクリーンを描画
 		//アルファ値を有効化
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, FULL_ALPHA);
 		barPSRenderer_->SetPosAndDraw(barScreen_, outScreen, drawX, drawY);
 		//ブレンドモードを戻す
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, FULL_ALPHA);
 	}
 
 }
@@ -247,12 +244,7 @@ void ScorePanel::DrawCharacterHpBar(const CharacterBase* target, int posX, int p
 			//チュートリアル中はHP表示を満タンで固定
 			hpBarValue = target->GetHpMax();
 		}
-		//DrawUtility::DrawBar({ posX ,posY },
-		//	barX, posX + barSize, barWidth,
-		//	color);
-		//DrawUtility::DrawBarGlossy({ posX ,posY},
-		//	barX, posX + barSize, barWidth,
-		//	color);
+		
 		DrawUtility::DrawBarGlossy({ posX ,posY },
 				 posX + barSize, barWidth,
 				color, hpBarValue, target->GetHpMax());
@@ -273,14 +265,14 @@ void ScorePanel::DrawCharacterHpBar(const CharacterBase* target, const BarStruct
 		SetDrawScreen(barScreen_);
 		ClearDrawScreen();
 		//描画座標を左上に
-		drawX = 0;
-		drawY = 0;
+		drawX = DRAW_POS_START;
+		drawY = DRAW_POS_START;
 		//マテリアルに値セット
 		barPSMaterial_->SetValue(static_cast<float>(bar.flashTimer) / BAR_FLASH_TIME);
 	}
 	else
 	{
-		if (bar.animTimer > 0)
+		if (bar.animTimer > INITIAL_COUNTER)
 		{
 			//演出中は上下にランダムに動かす(useScreen == false)
 			drawY += HP_ANIM_RAND / 2 - GetRand(HP_ANIM_RAND - 1);
@@ -300,17 +292,17 @@ void ScorePanel::DrawCharacterHpBar(const CharacterBase* target, const BarStruct
 	{
 		drawX = bar.x;
 		drawY = bar.y;
-		if (bar.animTimer > 0)
+		if (bar.animTimer > INITIAL_COUNTER)
 		{
 			//演出中は上下にランダムに動かす(useScreen == true)
 			drawY += HP_ANIM_RAND / 2 - GetRand(HP_ANIM_RAND - 1);
 		}
 		//barスクリーンを描画
 		//アルファ値を有効化
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, FULL_ALPHA);
 		barPSRenderer_->SetPosAndDraw(barScreen_, outScreen, drawX, drawY);
 		//ブレンドモードを戻す
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, FULL_ALPHA);
 	}
 }
 
@@ -321,8 +313,8 @@ void ScorePanel::DrawPlayerHpBar(const Player& target, const BarStruct& bar, boo
 	if (useScreen)
 	{
 		//一時スクリーンの左上に合わせる
-		drawX = 0;
-		drawY = 0;
+		drawX = DRAW_POS_START;
+		drawY = DRAW_POS_START;
 		//マテリアルにタイマー反映
 		barPSMaterial_->SetValue(static_cast<float>(bar.flashTimer) / BAR_FLASH_TIME);
 		//スクリーン
@@ -331,7 +323,7 @@ void ScorePanel::DrawPlayerHpBar(const Player& target, const BarStruct& bar, boo
 	}
 	else
 	{
-		if (bar.animTimer > 0)
+		if (bar.animTimer > INITIAL_COUNTER)
 		{
 			//演出中は上下にランダムに動かす(useScreen == false)
 			drawY += HP_ANIM_RAND / 2 - GetRand(HP_ANIM_RAND - 1);
@@ -340,7 +332,6 @@ void ScorePanel::DrawPlayerHpBar(const Player& target, const BarStruct& bar, boo
 	//プレイヤーhp
 	DrawCharacterHpBar(&target, drawX, drawY, bar.size, bar.width, {0,255,0});
 	//プレイヤー弾
-	static constexpr int SHOTBAR_WIDTH = 4;
 	drawX += FRAME_WIDTH_BAR;
 	drawY += FRAME_WIDTH_BAR- SHOTBAR_WIDTH;
 	DrawUtility::DrawBar({ drawX,drawY +bar.width },
@@ -350,17 +341,17 @@ void ScorePanel::DrawPlayerHpBar(const Player& target, const BarStruct& bar, boo
 	{
 		drawX = bar.x;
 		drawY = bar.y;
-		if (bar.animTimer > 0)
+		if (bar.animTimer > INITIAL_COUNTER)
 		{
 			//演出中は上下にランダムに動かす(useScreen == true)
 			drawY += HP_ANIM_RAND / 2 - GetRand(HP_ANIM_RAND - 1);
 		}
 		//barスクリーンを描画
 		//アルファ値を有効化
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, FULL_ALPHA);
 		barPSRenderer_->SetPosAndDraw(barScreen_, outScreen, drawX, drawY);
 		//ブレンドモードを戻す
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, FULL_ALPHA);
 	}
 }
 
@@ -392,11 +383,11 @@ void ScorePanel::Release()
 	barPSRenderer_ = nullptr;
 
 	DeleteGraph(barScreen_);
-	barScreen_ = -1;
+	barScreen_ = INVALID_HANDLE;
 
 	DeleteGraph(lifeImg_);
-	lifeImg_ = -1;
+	lifeImg_ = INVALID_HANDLE;
 
 	DeleteGraph(bgImg_);
-	bgImg_ = -1;
+	bgImg_ = INVALID_HANDLE;
 }

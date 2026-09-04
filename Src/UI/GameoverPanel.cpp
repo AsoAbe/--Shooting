@@ -7,10 +7,6 @@
 #include "../Common/ScoreData.h"
 #include "GameoverPanel.h"
 
-namespace
-{
-	constexpr int GAMEOVER_PANEL_MIN_TIME = PanelBase::PANEL_MIN_TIME * 2;
-}
 GameoverPanel::GameoverPanel(SceneGame& sceneGame, const ScoreData& score) :PanelBase(sceneGame), counter_(0), score_(score)
 {
 }
@@ -36,28 +32,24 @@ void GameoverPanel::Update()
 
 void GameoverPanel::Draw()
 {
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255 / 2);
-	DrawBox(0, 0, Application::MAINGAME_SIZE_X, Application::SCREEN_SIZE_Y, 0x000000, true);
-	SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, 0);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, FULL_ALPHA / HALF_DIVISOR);
+	DrawBox(0, 0, Application::MAINGAME_SIZE_X, Application::SCREEN_SIZE_Y, DRAW_COLOR_BLACK, true);
+	SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, DRAW_POS_START);
 
-	DrawUtility::DrawStringCenterScreen("GameOver", 0xffffff, TEXT_Y, Application::MAINGAME_SIZE_X);
+	DrawUtility::DrawStringCenterScreen("GameOver", DRAW_COLOR_WHITE, TEXT_Y, Application::MAINGAME_SIZE_X);
 
 	int drawX = SCORE_TEXT_X;
 	int drawY = SCORE_RESULT_TEXT_Y;
 	
-	int drawColor = 0xffffff;
-	if (score_.resultScore >= 0)
+	int drawColor = DRAW_COLOR_WHITE;
+	if (score_.resultScore >= SCORE_DISPLAY_INVALID)
 	{
 		//スコア表示が有効な場合
-
-		////パーセントでボスの残りHPを描画
-		//DrawFormatString(drawX, SCORE_TEXT_Y, 0xffffff, "ボスの残りHP : %.0f%%", (1-score_.targetProgression) * 100.0f);
-
 		int highScore = ScoreManager::GetInstance().GetHighScore();
 		//ハイスコアを更新した場合、色を変更して描画
 		if (score_.resultScore >= highScore)
 		{
-			drawColor = 0xffff00;
+			drawColor = DRAW_COLOR_YELLOW;
 		}
 
 		//スコアテキスト描画
