@@ -7,59 +7,48 @@ void
 BGM::SetBgmInputType(const BgmType tyep)
 {
 
-	//sceneManager_->GetInstance().BgmChang(bgmId_.c_str());
 	switch (tyep)
 	{
 	case BgmType::eMenu_locked:
 		bgmId_ = (Application::PATH_BGM + "GameBgm/Touhou_locked-girl_YouFulca.mp3").c_str();
 		bgmName_ = { "ƒ‰ƒNƒgƒK[ƒ‹ ` ­—–§Žº" };
-		//sceneManager_->GetInstance().BgmChang(bgmId_.c_str());
 		break;
 	case BgmType::eMenu_Luna:
 		bgmId_ = (Application::PATH_BGM + "GameBgm/Touhou_Luna-dial_YouFulca.mp3").c_str();
 		bgmName_ = { "ŒŽŽžŒv `ƒ‹ƒiEƒ_ƒCƒAƒ‹" };
-		//sceneManager_->GetInstance().BgmChang(bgmId_.c_str());
 		break;
 	case BgmType::eMenu_septet:
 		bgmId_ = (Application::PATH_BGM + "GameBgm/Touhou_septet-YouFulca.mp3").c_str();
 		bgmName_ = { "–S‚«‰¤—‚Ìˆ×‚ÌƒZƒvƒeƒbƒg" };
-		//sceneManager_->GetInstance().BgmChang(bgmId_.c_str());
 		break;
 	case BgmType::eMenu_UNowen:
 		bgmId_ = (Application::PATH_BGM + "GameBgm/Touhou_UNowen-YouFulca.mp3").c_str();
 		bgmName_ = { "U.N.ƒI[ƒGƒ“‚Í”Þ—‚È‚Ì‚©?" };
-		//sceneManager_->GetInstance().BgmChang(bgmId_.c_str());
 		break;
 	
 	case BgmType::eMenu_Fukanou:
 		bgmId_ = (Application::PATH_BGM + "GameBgm/nc132382_y“Œ•ûz•s‰Â”\’e–‹‚É‚Í”½‘¥‚ð_ƒAƒŒƒ“ƒW.mp3").c_str();
 		bgmName_ = { "•s‰Â”\’e–‹‚É‚Í”½‘¥‚ð_ƒAƒŒƒ“ƒW" };
-		//sceneManager_->GetInstance().BgmChang(bgmId_.c_str());
 		break;
 
 	case BgmType::eMenu_Haiboku:
 		bgmId_ = (Application::PATH_BGM + "GameBgm/nc138201_”s–k‚Ì‰p—Y`Somehow_survived.mp3").c_str();
 		bgmName_ = { "”s–k‚Ì‰p—Y`Somehow_survived" };
-		//sceneManager_->GetInstance().BgmChang(bgmId_.c_str());
 		break;
 
 	case BgmType::eMenu_himetyumeno:
 		bgmId_ = (Application::PATH_BGM + "GameBgm/nc378681_y“Œ•ûƒAƒŒƒ“ƒWzÓŒŽ`äÂ‚ß‚½–²‚ÌŒ‡•Ð`y“Œ•û“®‰æBGMŽx‰‡z.wav").c_str();
 		bgmName_ = { "ÓŒŽ`äÂ‚ß‚½–²‚ÌŒ‡•Ð`" };
-		//sceneManager_->GetInstance().BgmChang(bgmId_.c_str());
 		break;
 
 	case BgmType::none:
 		bgmId_ = Application::PATH_BGM + "GameBgm/Touhou_locked-girl_YouFulca.mp3";
 		bgmName_ = { "ƒ‰ƒNƒgƒK[ƒ‹ ` ­—–§Žº" };
-		//sceneManager_->GetInstance().BgmChang(bgmId_.c_str());
 		break;
 	default:
 		
 		break;
 	}
-	
-	
 }
 
 std::string BGM::GetBgmInputType(void)
@@ -81,7 +70,6 @@ BGM::BGM()
 	
 	bgmId_ = "";
 	bgmName_ = "";
-		//PlayMusic(bgmId_.c_str(), DX_PLAYTYPE_LOOP);
 }
 
 BGM::~BGM()
@@ -100,5 +88,4 @@ void BGM::Draw(void)
 
 void BGM::ResetTable()
 {
-
 }

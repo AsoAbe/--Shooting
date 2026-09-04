@@ -5,8 +5,23 @@ class SceneTutorial :
     public SceneGame
 {
 public:
-    SceneTutorial();
+    // チュートリアル表示
+    static constexpr int TUTORIAL_BOX_Y_OFFSET = 2;
+    static constexpr int PROGRESS_BAR_SIZE = 160;
 
+    // 描画
+    static constexpr int DRAW_POS_START = 0;
+    static constexpr int TUTORIAL_BLEND_ALPHA = 96;
+    static constexpr int FULL_BLEND_ALPHA = 255;
+
+    // 描画色
+    static constexpr int TUTORIAL_TEXT_COLOR = 0xFFFF00;
+    static constexpr int TUTORIAL_BACKGROUND_COLOR = 0x000000;
+
+    // 進行度
+    static constexpr int TUTORIAL_PROGRESS_COMPLETE = 1;
+
+    SceneTutorial();
 
     bool virtual Init(void) override;
     //更新

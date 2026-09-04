@@ -15,8 +15,49 @@ class PixelShaderRenderer;
 class ScorePanel
 {
 public:
+	// 初期値
+	static constexpr int INITIAL_COUNTER = 0;
+	static constexpr int INVALID_HANDLE = -1;
+
+	// ライフ画像
 	static constexpr int LIFE_IMG_SIZE = 16;
 	static constexpr int LIFE_IMG_HALF = LIFE_IMG_SIZE / 2;
+
+	// 描画
+	static constexpr int DRAW_POS_START = 0;
+	static constexpr int FULL_ALPHA = 255;
+	static constexpr int BLEND_ALPHA_BACKGROUND = 153;
+	static constexpr int DRAW_BLEND_RESET = 0;
+
+	// 描画色
+	static constexpr int DRAW_COLOR_BLACK = 0x000000;
+	static constexpr int DRAW_COLOR_WHITE = 0xFFFFFF;
+	static constexpr int DRAW_COLOR_GREEN = 0x00FF00;
+	static constexpr int DRAW_COLOR_YELLOW = 0xFFFF00;
+
+	// HPバー
+	static constexpr int BAR_SCREEN_SIZE = 256;
+	static constexpr int BAR_FLASH_TIME = 30;
+	static constexpr int BAR_ANIM_TIME = 12;
+	static constexpr int BAR_SIZE = 100;
+	static constexpr int BAR_WIDTH = 16;
+	static constexpr int HP_ANIM_RAND = 3;
+	static constexpr int SHOTBAR_WIDTH = 4;
+
+	// 座標
+	static constexpr int ENEMY_BAR_Y = 88;
+	static constexpr int PLAYER_BAR_Y = 420;
+	static constexpr int PANEL_POS_X_OFFSET = 8;
+	static constexpr int BOSS_HP_Y_OFFSET = 64;
+
+	// ライフ表示
+	static constexpr int LIFE_LOW = 1;
+
+	// バー色
+	static constexpr VECTOR STAMINA_BAR_COLOR = { 255, 255, 0 };
+	static constexpr VECTOR PLAYER_HP_BAR_COLOR = { 0, 255, 0 };
+	static constexpr VECTOR SHOT_BAR_COLOR = { 255, 255, 0 };
+	static constexpr VECTOR BOSS_HP_BAR_COLOR = { 210, 32, 0 };
 
 	class BarStruct
 	{

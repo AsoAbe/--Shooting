@@ -35,20 +35,20 @@ void ContinuePanel::Update()
 void ContinuePanel::Draw()
 {
 	const Player& player = *(sceneGame_.GetOManager()->GetPlayer());
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255 / 2);
-	DrawBox(0, 0, Application::MAINGAME_SIZE_X, Application::SCREEN_SIZE_Y, 0x000000, true);
-	SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, 0);
-	DrawUtility::DrawStringCenterScreen("YOU DIED", 0xffffff, 200, Application::MAINGAME_SIZE_X);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, FULL_ALPHA / HALF_DIVISOR);
+	DrawBox(DRAW_POS_START, DRAW_POS_START, Application::MAINGAME_SIZE_X, Application::SCREEN_SIZE_Y, DRAW_COLOR_BLACK, true);
+	SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, BLEND_ALPHA_RESET);
+	DrawUtility::DrawStringCenterScreen("YOU DIED", DRAW_COLOR_WHITE, DEATH_TEXT_POS_Y, Application::MAINGAME_SIZE_X);
 	std::string text = "残りライフ : %d";
 	int textWidth = GetDrawFormatStringWidth(text.c_str(), player.GetLife());
-	DrawFormatString((Application::MAINGAME_SIZE_X - textWidth) / 2, 232, 0xffff00, text.c_str(), player.GetLife());
+	DrawFormatString((Application::MAINGAME_SIZE_X - textWidth) / HALF_DIVISOR, LIFE_TEXT_POS_Y, DRAW_COLOR_YELLOW, text.c_str(), player.GetLife());
 	if (counter_ < PANEL_MIN_TIME)
 	{
 		return;
 	}
 	if (DrawUtility::Blink(counter_))
 	{
-		DrawUtility::DrawStringCenterScreen("スペースキーで復活", 0xffffff, 400, Application::MAINGAME_SIZE_X);
+		DrawUtility::DrawStringCenterScreen("スペースキーで復活", DRAW_COLOR_WHITE,CONTINUE_TEXT_POS_Y, Application::MAINGAME_SIZE_X);
 	}
 }
 

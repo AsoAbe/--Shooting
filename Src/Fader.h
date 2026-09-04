@@ -9,6 +9,21 @@ class Fader
 {
 
 public:
+	// 初期値
+	static constexpr float INITIAL_ALPHA = 0.0f;
+	static constexpr int INVALID_HANDLE = -1;
+
+	// 透明度
+	static constexpr float MIN_ALPHA = 0.0f;
+	static constexpr float MAX_ALPHA = 255.0f;
+
+	// 描画
+	static constexpr int DRAW_POS_START = 0;
+	static constexpr int DRAW_BLEND_RESET = 0;
+	static constexpr int DRAW_COLOR_BLACK = 0x000000;
+
+	// フェーダー選択
+	static constexpr int RANDOM_INDEX_OFFSET = 1;
 
 	// フェードが進む速さ
 	static constexpr float SPEED_ALPHA = 5;

@@ -12,24 +12,24 @@
 Fader::Fader(void)
 {
 	state_ = STATE::NONE;
-	alpha_ = 0.0f;
+	alpha_ = INITIAL_ALPHA;
 	isPreEnd_ = true;
 	isEnd_ = true;
 	faderArray_.clear();
-	faderScreen_ = -1;
-	faderIndex_ = -1;
+	faderScreen_ = INVALID_HANDLE;
+	faderIndex_ = INVALID_HANDLE;
 }
 
 Fader::~Fader(void)
 {
 	DeleteGraph(faderScreen_);
-	faderScreen_ = -1;
+	faderScreen_ = INVALID_HANDLE;
 }
 
 void Fader::Init(void)
 {
 	state_ = STATE::NONE;
-	alpha_ = 0.0f;
+	alpha_ = INITIAL_ALPHA;
 	isPreEnd_ = true;
 	isEnd_ = true;
 
@@ -64,10 +64,10 @@ void Fader::Update(void)
 	case STATE::FADE_OUT:
 	case STATE::FADEOUT_PS:
 		alpha_ += SPEED_ALPHA;
-		if (alpha_ > 255)
+		if (alpha_ > MAX_ALPHA)
 		{
 			// フェード終了
-			alpha_ = 255;
+			alpha_ = MAX_ALPHA;
 			isPreEnd_ = true;
 		}
 		break;
@@ -75,10 +75,10 @@ void Fader::Update(void)
 	case STATE::FADE_IN:
 	case STATE::FADEIN_PS:
 		alpha_ -= SPEED_ALPHA;
-		if (alpha_ < 0)
+		if (alpha_ < MIN_ALPHA)
 		{
 			// フェード終了
-			alpha_ = 0;
+			alpha_ = MIN_ALPHA;
 			isPreEnd_ = true;
 		}
 		break;
@@ -101,25 +101,25 @@ void Fader::Draw(int inScreen)
 	case STATE::FADE_IN:
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(alpha_));
 		DrawBox(
-			0, 0,
+			DRAW_POS_START, DRAW_POS_START,
 			Application::SCREEN_SIZE_X,
 			Application::SCREEN_SIZE_Y,
-			0x000000, true);
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			DRAW_COLOR_BLACK, true);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, DRAW_POS_START);
 		break;
 	case STATE::FADEOUT_PS:
 	case STATE::FADEIN_PS:;
 		SetDrawScreen(faderScreen_);
 		ClearDrawScreen();
-		if (faderIndex_ != -1)
+		if (faderIndex_ != INVALID_HANDLE)
 		{
-			faderArray_[faderIndex_].psMaterial->SetValue(alpha_ / 255);
+			faderArray_[faderIndex_].psMaterial->SetValue(alpha_ / MAX_ALPHA);
 			faderArray_[faderIndex_].psRenderer->Draw(inScreen, faderScreen_);
 		}
 		//元に戻して内容を描画
 		SetDrawScreen(inScreen);
 		ClearDrawScreen();
-		DrawGraph(0, 0, faderScreen_,false);
+		DrawGraph(DRAW_POS_START, DRAW_POS_START, faderScreen_,false);
 		break;
 	}
 
@@ -145,11 +145,11 @@ void Fader::SetFade(STATE state)
 	}
 	if (state_ == STATE::FADE_IN || state_ == STATE::FADEIN_PS)
 	{
-		alpha_ = 255;
+		alpha_ = MAX_ALPHA;
 	}
 	else if (state_ == STATE::FADE_OUT || state_ == STATE::FADEOUT_PS)
 	{
-		alpha_ = 0;
+		alpha_ = MIN_ALPHA;
 		faderIndex_ = GetRand(faderArray_.size() - 1);
 	}
 }

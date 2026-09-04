@@ -6,11 +6,7 @@
 #include "../Common/ScoreData.h"
 #include "GameclearPanel.h"
 
-namespace
-{
-	constexpr int GAMECLEAR_PANEL_MIN_TIME = PanelBase::PANEL_MIN_TIME * 2;
-}
-GameclearPanel::GameclearPanel(SceneGame& sceneGame, const ScoreData& score):PanelBase(sceneGame), score_(score), counter_(0)
+GameclearPanel::GameclearPanel(SceneGame& sceneGame, const ScoreData& score):PanelBase(sceneGame), score_(score), counter_(INITIAL_COUNTER)
 {
 	
 }
@@ -42,44 +38,39 @@ void GameclearPanel::Update()
 
 void GameclearPanel::Draw()
 {
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255 / 2);
-	DrawBox(0, 0, Application::MAINGAME_SIZE_X, Application::SCREEN_SIZE_Y, 0x000000, true);
-	SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, 0);
-	DrawUtility::DrawStringCenterScreen("GameClear", 0xffffff, TEXT_Y, Application::MAINGAME_SIZE_X);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, FULL_ALPHA / HALF_DIVISOR);
+	DrawBox(DRAW_POS_START, DRAW_POS_START, Application::MAINGAME_SIZE_X, Application::SCREEN_SIZE_Y, DRAW_COLOR_BLACK, true);
+	SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, DRAW_POS_START);
+	DrawUtility::DrawStringCenterScreen("GameClear", DRAW_COLOR_WHITE, TEXT_Y, Application::MAINGAME_SIZE_X);
 
 	std::string text = "今回のタイム : %d";
-	//int textWidth = GetDrawFormatStringWidth(text.c_str(), score_);//SCORE_TEXT_Xの値を求めた手順
-	//int drawX = (Application::MAINGAME_SIZE_X - textWidth) / 2;
 
 	//スコアのテキスト部分を描画
 #pragma region SCORE_TEXT
 	int drawX = SCORE_TEXT_X;
 	int drawY = PanelBase::SCORE_TEXT_Y;
-	int drawColor = 0xffffff;
+	int drawColor = DRAW_COLOR_WHITE;
 	//今回のタイム
-	DrawFormatString(drawX, drawY, 0xffffff, "今回のタイム         ");
-	drawY += 20;
+	DrawFormatString(drawX, drawY, DRAW_COLOR_WHITE, "今回のタイム         ");
+	drawY += SCORE_TIME_ROW_OFFSET;
 
 	//クリアボーナス
-	DrawFormatString(drawX, drawY, 0xffffff, "クリアボーナス       ");
+	DrawFormatString(drawX, drawY, DRAW_COLOR_WHITE, "クリアボーナス       ");
 	drawY += DrawUtility::DEFAULT_TEXT_SIZE;
 
 	//タイムボーナス
-	DrawFormatString(drawX, drawY, 0xffffff, "タイムボーナス       ");
+	DrawFormatString(drawX, drawY, DRAW_COLOR_WHITE, "タイムボーナス       ");
 	drawY += DrawUtility::DEFAULT_TEXT_SIZE;
 
 	//ライフボーナス
-	DrawFormatString(drawX, drawY, 0xffffff, "ライフボーナス       ");
+	DrawFormatString(drawX, drawY, DRAW_COLOR_WHITE, "ライフボーナス       ");
 	drawY += DrawUtility::DEFAULT_TEXT_SIZE;
-	if (score_.perfectScore > 0)
+	if (score_.perfectScore > DRAW_POS_START)
 	{
 		//ノーダメージボーナス 
 		//有効な場合のみ描画
-		DrawFormatString(drawX, drawY, 0xffffff, "ノーダメージボーナス  ");
+		DrawFormatString(drawX, drawY, DRAW_COLOR_WHITE, "ノーダメージボーナス  ");
 	}  
-	//drawY += DrawUtility::DEFAULT_TEXT_SIZE*2;//ここまでの結果を定数化
-
-	//リザルト
 
 	drawY = SCORE_RESULT_TEXT_Y;
 
@@ -87,7 +78,7 @@ void GameclearPanel::Draw()
 	//ハイスコアを更新した場合、色を変更して描画
 	if (score_.resultScore >= highScore)
 	{
-		drawColor = 0xffff00;
+		drawColor = DRAW_COLOR_YELLOW;
 	}
 	//ハイスコア
 	DrawFormatString(drawX, drawY, drawColor, "ハイスコア           ");
@@ -101,36 +92,35 @@ void GameclearPanel::Draw()
 
 	drawX = SCORE_NUM_TEXT_X;;
 	drawY = PanelBase::SCORE_TEXT_Y;
-	drawColor = 0xffffff;
+	drawColor = DRAW_COLOR_WHITE;
 	//今回のタイム
-	DrawFormatString(drawX, drawY, 0xffffff, ": %.0f", score_.timeS);
-	drawY += 20;
+	DrawFormatString(drawX, drawY, DRAW_COLOR_WHITE, ": %.0f", score_.timeS);
+	drawY += SCORE_TIME_ROW_OFFSET;
 
 	//クリアボーナス
-	DrawFormatString(drawX, drawY, 0xffffff, ": %d", score_.winScore);
+	DrawFormatString(drawX, drawY, DRAW_COLOR_WHITE, ": %d", score_.winScore);
 	drawY += DrawUtility::DEFAULT_TEXT_SIZE;
 
 	//タイムボーナス
-	DrawFormatString(drawX, drawY, 0xffffff, ": %d", score_.timeScore);
+	DrawFormatString(drawX, drawY, DRAW_COLOR_WHITE, ": %d", score_.timeScore);
 	drawY += DrawUtility::DEFAULT_TEXT_SIZE;
 
 	//ライフボーナス
-	DrawFormatString(drawX, drawY, 0xffffff, ": %d × %d", score_.lifeScore, score_.lifeScoreNum);
+	DrawFormatString(drawX, drawY, DRAW_COLOR_WHITE, ": %d × %d", score_.lifeScore, score_.lifeScoreNum);
 	drawY += DrawUtility::DEFAULT_TEXT_SIZE;
-	if (score_.perfectScore > 0)
+	if (score_.perfectScore > DRAW_POS_START)
 	{
 		//ノーダメージボーナス
 		//有効な場合のみ描画
-		DrawFormatString(drawX, drawY, 0xffffff, ": %d", score_.perfectScore);
+		DrawFormatString(drawX, drawY, DRAW_COLOR_WHITE, ": %d", score_.perfectScore);
 	}
 
 	//リザルト
-
 	drawY = SCORE_RESULT_TEXT_Y;
 	//ハイスコアを更新した場合、色を変更して描画
 	if (score_.resultScore >= highScore)
 	{
-		drawColor = 0xffff00;
+		drawColor = DRAW_COLOR_YELLOW;
 	}
 	//ハイスコア           
 	DrawFormatString(drawX, drawY, drawColor, ": %d", highScore);
@@ -146,7 +136,7 @@ void GameclearPanel::Draw()
 	}
 	if (DrawUtility::Blink(counter_))
 	{
-		DrawUtility::DrawStringCenterScreen("スペースキーでタイトルに戻る", 0xffffff, PanelBase::TITLESCENE_TEXT_Y, Application::MAINGAME_SIZE_X);
+		DrawUtility::DrawStringCenterScreen("スペースキーでタイトルに戻る", DRAW_COLOR_WHITE, PanelBase::TITLESCENE_TEXT_Y, Application::MAINGAME_SIZE_X);
 	}
 }
 
