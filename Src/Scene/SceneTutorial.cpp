@@ -26,16 +26,15 @@ SceneTutorial::SceneTutorial():SceneGame()
 	gameState_ = GAME_STATE::TUTORIAL_JUMP;
 	shotTutorialTextFlag_ = false;
 	progressBar_.y =TUTORIALBOX_Y - BAR_WIDTH;
-	progressBar_.size = 160;
+	progressBar_.size = PROGRESS_BAR_SIZE;
 	progressBar_.width = BAR_WIDTH;
-	preProgressScore_ = 0;
+	preProgressScore_ = DRAW_POS_START;
 }
 
 bool SceneTutorial::Init(void)
 {
 	bool ret =SceneGame::Init();
-	//今のところ未使用
-	//SoundManager::GetInstance().ChangeBGM(SoundManager::SOUND_ID::CURSOR,true);
+	
 	return ret;
 }
 
@@ -90,27 +89,27 @@ void SceneTutorial::Draw()
 	Draw_MainGame();
 	if (IsTutorial() && sceneManager.IsEndFade())
 	{
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 96);
-		DrawBox(0, 0, Application::MAINGAME_SIZE_X, TUTORIALBOX_Y, 0x000000, true);
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, TUTORIAL_BLEND_ALPHA);
+		DrawBox(DRAW_POS_START, DRAW_POS_START, Application::MAINGAME_SIZE_X, TUTORIALBOX_Y, TUTORIAL_BACKGROUND_COLOR, true);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, FULL_BLEND_ALPHA);
 		switch (gameState_)
 		{
 		case SceneGame::GAME_STATE::TUTORIAL_JUMP:
-			DrawString(0, 0, "現在のチュートリアル:滑空で敵の攻撃を避ける\nXキーでジャンプ。長押しするか空中でもう一度押すと滑空に切り替え。\n(Rキー長押しでスキップ)", 0xffff00);
+			DrawString(DRAW_POS_START, DRAW_POS_START, "現在のチュートリアル:滑空で敵の攻撃を避ける\nXキーでジャンプ。長押しするか空中でもう一度押すと滑空に切り替え。\n(Rキー長押しでスキップ)", TUTORIAL_TEXT_COLOR);
 			break;
 		case SceneGame::GAME_STATE::TUTORIAL_SHOT:
 			if (shotTutorialTextFlag_)
 			{
-				DrawFormatString(0, 0, 0xffff00,
+				DrawFormatString(DRAW_POS_START, DRAW_POS_START, TUTORIAL_TEXT_COLOR,
 					"現在のチュートリアル:カウンターショットで敵を倒す\n矢印キーで移動。\n当たらない程度にギリギリを狙って敵の攻撃を避けるとリングが表示されカウンター成立。\n成功するとZキーの射撃が強化される。(長押しで連射)\n(Rキー長押しでスキップ)");
-				DrawFormatString(0, TUTORIAL_BAR_Y, 0xffff00,
+				DrawFormatString(DRAW_POS_START, TUTORIAL_BAR_Y, TUTORIAL_TEXT_COLOR,
 					"(Zキーを押して射撃)");
 			}
 			else 
 			{
-				DrawFormatString(0, 0, 0xffff00,
+				DrawFormatString(DRAW_POS_START, DRAW_POS_START, TUTORIAL_TEXT_COLOR,
 					"現在のチュートリアル:カウンターショットで敵を倒す\n矢印キーで移動。\n当たらない程度にギリギリを狙って敵の攻撃を避けるとリングが表示されカウンター成立。\n成功するとZキーの射撃が強化される。(長押しで連射)\n(Rキー長押しでスキップ)");
-				DrawFormatString(0, TUTORIAL_BAR_Y, 0xffff00,
+				DrawFormatString(DRAW_POS_START, TUTORIAL_BAR_Y, TUTORIAL_TEXT_COLOR,
 					"(あと%d回)",
 					(TUTORIAL_SHOT_NUM - oManager_->GetPlayer()->GetGrazeCombo()));
 			}
@@ -118,7 +117,7 @@ void SceneTutorial::Draw()
 
 			break;
 		case SceneGame::GAME_STATE::TUTORIAL_END:
-			DrawString(0, 0, "チュートリアル達成!\nRキーで本番開始。", 0xffff00);
+			DrawString(DRAW_POS_START, DRAW_POS_START, "チュートリアル達成!\nRキーで本番開始。", TUTORIAL_TEXT_COLOR);
 			break;
 		default:
 			break;
@@ -160,7 +159,7 @@ float SceneTutorial::GetGrazeTutorialProgress()const
 	if (shotTutorialTextFlag_)
 	{
 		//完了済み
-		return 1;
+		return TUTORIAL_PROGRESS_COMPLETE;
 	}
 	return static_cast<float>(oManager_->GetPlayer()->GetGrazeCombo())/TUTORIAL_SHOT_NUM;
 }

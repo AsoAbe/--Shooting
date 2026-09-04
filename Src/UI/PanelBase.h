@@ -10,6 +10,21 @@ class SceneGame;
 class PanelBase
 {
 public:
+	// 初期値
+	static constexpr int INITIAL_COUNTER = 0;
+
+	// 描画位置
+	static constexpr int DRAW_POS_START = 0;
+
+	// 描画設定
+	static constexpr int FULL_ALPHA = 255;
+	static constexpr int HALF_DIVISOR = 2;
+
+	// 描画色
+	static constexpr int DRAW_COLOR_BLACK = 0x000000;
+	static constexpr int DRAW_COLOR_WHITE = 0xFFFFFF;
+	static constexpr int DRAW_COLOR_YELLOW = 0xFFFF00;
+
 	/// <summary>
 	/// 表示後に操作を受け付けない時間(フレーム)
 	/// </summary>
@@ -24,11 +39,6 @@ public:
 	/// ゲームオーバー画像(現在はテキストのみ)のY座標
 	/// </summary>
 	static constexpr int TEXT_Y = 200;
-
-	// /// <summary>
-	// /// ゲームオーバー画像のX座標(現在はテキストのみのため未使用)
-	// /// </summary>
-	//static constexpr int TEXT_X = 0;
 
 	/// <summary>
 	/// スコアテキストの開始位置Y座標
