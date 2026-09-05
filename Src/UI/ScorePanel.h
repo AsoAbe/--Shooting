@@ -59,6 +59,20 @@ public:
 	static constexpr VECTOR SHOT_BAR_COLOR = { 255, 255, 0 };
 	static constexpr VECTOR BOSS_HP_BAR_COLOR = { 210, 32, 0 };
 
+	// HPバー演出
+	static constexpr int HP_ANIM_DIVISOR = 2;
+	static constexpr int HP_ANIM_RANDOM_OFFSET = 1;
+
+	// バー間隔
+	static constexpr int BAR_VERTICAL_GAP = 8;
+	static constexpr int LIFE_BAR_GAP = 4;
+
+	// ピクセルシェーダー
+	static constexpr int PIXEL_SHADER_VALUE_INDEX = 2;
+	static constexpr int PIXEL_SHADER_ENABLED = 1;
+	static constexpr float FLASH_POWER = 0.8f;
+
+
 	class BarStruct
 	{
 	public:
