@@ -52,12 +52,6 @@ public:
 	//メッセージを即フェードアウトに切り替え(画面遷移など)
 	void FadeoutMessage();
 
-	////方向からテキストを返す
-	//static std::string GetDirText(Map::MAP_DIR dir, Map::MAP_MESSAGE m);
-	////方向から色を返す
-	//static int GetDirColor(MAP_DIR dir);
-
-
 
 private:
 	//インスタンス
@@ -71,9 +65,6 @@ private:
 	int centerMessageTimer_;
 	//colorの色で点滅
 	int messageColor_;
-	////方角を記録
-	//Map::MAP_DIR messageDir_;
-
 
 	//コンストラクタ
 	MessageManager(void);
