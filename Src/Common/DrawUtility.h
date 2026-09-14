@@ -86,22 +86,6 @@ public:
 	/// <param name="valueMax">値の上限値</param>
 	static void DrawBar(Vector2 start, int endX, int width, const IntRGB& color, float value, float valueMax);
 
-	// /// <summary> HPバーなどを描画する</summary>
-	// /// <param name="start">開始座標</param>
-	// /// <param name="barX">GetBarXを入れる</param>
-	// /// <param name="endX">最大到達座標</param>
-	// /// <param name="width">バーの幅</param>
-	// /// <param name="color">色</param>
-	// static void DrawBar(Vector2 start, int barX, int endX, int width, int color);
-
-	// /// <summary>DrawBarのbarXを計算する</summary>
-	// /// <param name="startX">本体の開始座標X</param>
-	// /// <param name="length">最大の長さ</param>
-	// /// <param name="i">進行度</param>
-	// /// <param name="max">iの最大値</param>
-	// /// <returns>barX</returns>
-	// static int GetBarX(int startX, int length, float i, float max);
-
 	/// <summary>画像でHPゲージなどを描画するときに使う </summary>
 	/// <param name="num">現在値</param>
 	/// <param name="max">最大値</param>
@@ -134,14 +118,6 @@ public:
 	/// <param name="f">線形補間</param>
 	/// <returns>0xffffffなどの色を表す値</returns>
 	static unsigned int LerpColor(const IntRGB& a,const IntRGB& b,float f);
-
-	///// <summary> HPバーなどを描画する()</summary>
-	///// <param name="start">開始座標</param>
-	///// <param name="barX">GetBarXを入れる</param>
-	///// <param name="endX">最大到達座標</param>
-	///// <param name="width">バーの幅</param>
-	///// <param name="color">色</param>
-	//static void DrawBarGlossy(Vector2 start, int barX, int endX, int width, const IntRGB& color);
 
 	/// <summary> HPバーなどを描画する(枠付き)</summary>
 	/// <param name="start">開始座標</param>

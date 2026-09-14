@@ -81,8 +81,6 @@ public:
 	void BgmChang(std::string name);
 	std::string GetBgmChangType(void);
 private:
-	//int testPlayingEffect_;
-	//int testEffect_;
 
 	int backgroundColor_;//”wŒi‚ÌF;
 	int testImg_;//Effekseer—p‚Ì‰æ‘œ

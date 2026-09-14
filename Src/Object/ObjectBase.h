@@ -25,7 +25,6 @@ public:
 	//Šî–{“I‚È‘å‚«‚³
 	static constexpr VECTOR DEFAULT_SCALE = { 1.0f,1.0f,1.0f };
 
-
 	ObjectBase(const ObjectModelData& modelData);
 	virtual ~ObjectBase(void);
 	virtual void Init(void);

@@ -333,10 +333,7 @@ Quaternion Quaternion::GetRotation(MATRIX mat)
                 ret.w = (mat.m[0][1] - mat.m[1][0]) * s;
             }
     }
-
     return ret;
-
-
 }
 
 VECTOR Quaternion::GetDir(VECTOR dir) const

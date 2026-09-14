@@ -116,7 +116,6 @@ public:
 	/// </summary>
 	int GetBgmVolume()const;
 
-
 	/// <summary>
 	/// DxLibのChangeVolumeSoundMemを実行する。isActiveBGM_がfalseの時はvolumeを0として扱う
 	/// </summary>
@@ -154,7 +153,6 @@ private:
 
 	//デストラクタ
 	~SoundManager(void);
-
 
 	/// <summary>
 	/// サウンドのパスを返す
