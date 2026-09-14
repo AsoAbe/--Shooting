@@ -52,6 +52,10 @@ public:
 	//メッセージを即フェードアウトに切り替え(画面遷移など)
 	void FadeoutMessage();
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7aeeb0e3b310131a866b4e914a32283afa5c82be
 private:
 	//インスタンス
 	static MessageManager* instance_;
